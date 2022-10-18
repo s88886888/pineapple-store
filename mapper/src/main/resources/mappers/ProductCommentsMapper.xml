@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatisplusgenerator.mapper.ProductCommentsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.example.mybatisplusgenerator.pojo.ProductComments">
+        <id column="comm_id" property="commId" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="order_item_id" property="orderItemId" />
+        <result column="user_id" property="userId" />
+        <result column="is_anonymous" property="isAnonymous" />
+        <result column="comm_type" property="commType" />
+        <result column="comm_level" property="commLevel" />
+        <result column="comm_content" property="commContent" />
+        <result column="comm_imgs" property="commImgs" />
+        <result column="sepc_name" property="sepcName" />
+        <result column="reply_status" property="replyStatus" />
+        <result column="reply_content" property="replyContent" />
+        <result column="reply_time" property="replyTime" />
+        <result column="is_show" property="isShow" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        comm_id, product_id, product_name, order_item_id, user_id, is_anonymous, comm_type, comm_level, comm_content, comm_imgs, sepc_name, reply_status, reply_content, reply_time, is_show
+    </sql>
+
+</mapper>

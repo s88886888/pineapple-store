@@ -15,12 +15,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface UsersService extends IService<Users> {
 
 
-    public ResultVo Login(String userName , String passWord);
+     ResultVo Login(String userName, String passWord);
 
-    public ResultVo Resgit(String name,String passWord);
+     ResultVo Resgit(String name, String passWord);
 
-
-
+     boolean CheckUserByname(String userName);
 
 
 }

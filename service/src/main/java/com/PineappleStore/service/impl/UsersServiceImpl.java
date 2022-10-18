@@ -29,34 +29,39 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     @Autowired
     private UsersMapper usersMapper;
 
+    public boolean CheckUserByname(String userName) {
+
+        QueryWrapper<Users> checkwrapper = new QueryWrapper<>();
+        checkwrapper.lambda().select(Users::getUsername).eq(Users::getUsername, userName).last("limit 1");
+        Users checkuser = usersMapper.selectOne(checkwrapper);
+
+        return checkuser == null;
+
+    }
+
+
     @Override
     public ResultVo Login(String userName, String passWord) {
 
 
-        QueryWrapper<Users> checkwrapper = new QueryWrapper<>();
-        checkwrapper.select("username").eq("username", userName).last("limit 1");
-        Users checkuser = usersMapper.selectOne(checkwrapper);
+        boolean checkuser = CheckUserByname(userName);
 
 
-
-        if (checkuser == null) {
-
-            return new ResultVo("用户不存在", 404, null);
-
-        } else {
-
-
+        if (!checkuser) {
 
             String md5pwd = Md5Utils.md5(passWord);
-            if (md5pwd.equals(checkuser.getPassword())) {
-                return new ResultVo("用户登录成功", 200, checkuser);
+            QueryWrapper<Users> wrapper = new QueryWrapper<>();
+            wrapper.lambda().select(Users::getUsername, Users::getPassword).eq(Users::getUsername, userName).eq(Users::getPassword, md5pwd).last("limit 1");
+            Users wrapperuser = usersMapper.selectOne(wrapper);
+
+            if (md5pwd.equals(wrapperuser.getPassword())) {
+                return new ResultVo("用户登录成功", 200, wrapperuser);
             } else {
                 return new ResultVo("用户登录失败，密码错误", 404, null);
             }
-
+        } else {
+            return new ResultVo("用户不存在", 404, null);
         }
-
-
     }
 
 
@@ -66,16 +71,9 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         //线程锁
         synchronized (this) {
 
-            QueryWrapper<Users> wrapper = new QueryWrapper<>();
-            wrapper.select("username").eq("username", userName).last("limit 1");
+            boolean checkuser = CheckUserByname(userName);
 
-            Users users = usersMapper.selectOne(wrapper);
-
-
-
-            if (users == null) {
-
-
+            if (checkuser) {
 //                Date datetime = new Date(); // 注意是util包下的Date
 //                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 //                String date = sdf.format(datetime);
@@ -83,7 +81,8 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
                 String md5pwd = Md5Utils.md5(passWord);//md5密码加密
 
-                users = new Users();
+
+                Users users = new Users();
                 users.setUsername(userName);
                 users.setPassword(md5pwd);
                 users.setUserImg("img/user.jpg");
@@ -94,7 +93,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 int i = usersMapper.insert(users);
 
                 if (i > 0) {
-                    return new ResultVo("注册成功", 200, null);
+                    return new ResultVo("注册成功", 200, users);
                 } else {
                     return new ResultVo("注册失败", 404, null);
                 }

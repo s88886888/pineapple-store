@@ -86,4 +86,10 @@ public class Users implements Serializable {
     private Date userModtime;
 
 
+    /**
+     * 密钥 Token
+     */
+    private String Token;
+
+
 }

@@ -1,5 +1,6 @@
 package com.PineappleStore.service;
 
+import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.Product;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,5 +13,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2022-10-17
  */
 public interface ProductService extends IService<Product> {
+
+
+    ResultVo SelectByAll();
 
 }

@@ -28,6 +28,7 @@ public class UsersController {
 
     public ResultVo login(@RequestParam String userName, @RequestParam(value = "passWrod") String passWrod) {
         ResultVo resultVo = usersService.Login(userName, passWrod);
+
         return resultVo;
 
     }

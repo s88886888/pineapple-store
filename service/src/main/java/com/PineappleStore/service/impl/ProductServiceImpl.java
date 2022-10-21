@@ -35,8 +35,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         QueryWrapper<Product> wrapper = new QueryWrapper<>();
 
         List<Product> productList = productMapper.selectList(wrapper);
-
-        System.out.println(productList);
+        
         return new ResultVo("查询成功", StatusVo.success, productList);
 
     }

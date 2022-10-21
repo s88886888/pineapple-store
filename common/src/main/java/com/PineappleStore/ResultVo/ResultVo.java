@@ -16,7 +16,13 @@ public class ResultVo {
 
     private Object Data;
 
+    private String Token;
 
+    public ResultVo(String msg, int code, Object data) {
+        Msg = msg;
+        Code = code;
+        Data = data;
+    }
 }
 
 

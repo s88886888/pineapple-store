@@ -1,5 +1,6 @@
 package com.PineappleStore.service.impl;
 
+import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.dao.ProductCommentsMapper;
 import com.PineappleStore.entity.ProductComments;
 import com.PineappleStore.service.ProductCommentsService;
@@ -17,4 +18,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductCommentsServiceImpl extends ServiceImpl<ProductCommentsMapper, ProductComments> implements ProductCommentsService {
 
+
+    @Override
+    public ResultVo SelectByAll() {
+        return null;
+    }
 }

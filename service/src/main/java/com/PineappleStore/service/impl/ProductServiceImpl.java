@@ -1,11 +1,17 @@
 package com.PineappleStore.service.impl;
 
 
+import com.PineappleStore.ResultVo.ResultVo;
+import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.ProductMapper;
 import com.PineappleStore.entity.Product;
 import com.PineappleStore.service.ProductService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 /**
@@ -19,4 +25,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements ProductService {
 
+
+    @Autowired
+    private ProductMapper productMapper;
+
+    @Override
+    public ResultVo SelectByAll() {
+
+        QueryWrapper<Product> wrapper = new QueryWrapper<>();
+
+        List<Product> productList = productMapper.selectList(wrapper);
+        
+        return new ResultVo("查询成功", StatusVo.success, productList);
+
+    }
 }

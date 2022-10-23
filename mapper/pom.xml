@@ -64,7 +64,5 @@
             <artifactId>druid</artifactId>
             <version>1.2.13-SNSAPSHOT</version>
         </dependency>
-
-
     </dependencies>
 </project>

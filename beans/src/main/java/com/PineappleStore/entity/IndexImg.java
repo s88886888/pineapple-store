@@ -37,6 +37,12 @@ public class IndexImg implements Serializable {
      */
     private String imgUrl;
 
+
+    /**
+     * 名字 轮播图名字
+     */
+    private String imgName;
+
     /**
      * 背景色 背景颜色
      */

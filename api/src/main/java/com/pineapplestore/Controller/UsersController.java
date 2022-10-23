@@ -34,7 +34,8 @@ public class UsersController {
     }
 
     @PostMapping("/resgit")
-    public ResultVo Resgit(@RequestParam String userName, @RequestParam(value = "passWrod") String passWrod) {
+    public ResultVo Resgit(@RequestParam String userName, @RequestParam String passWrod) {
+        System.out.println(userName + passWrod);
         ResultVo resultVo = usersService.Resgit(userName, passWrod);
         return resultVo;
 

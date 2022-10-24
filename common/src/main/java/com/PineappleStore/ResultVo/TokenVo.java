@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResultVo {
+public class TokenVo {
+
 
     private String Msg;
 
@@ -16,10 +17,5 @@ public class ResultVo {
 
     private Object Data;
 
-
-
+    private String Token;
 }
-
-
-
-

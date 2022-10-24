@@ -1,7 +1,7 @@
 package com.pineapplestore.Controller;
 
 
-import com.PineappleStore.ResultVo.ResultVo;
+import com.PineappleStore.ResultVo.TokenVo;
 import com.PineappleStore.service.UsersService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +26,18 @@ public class UsersController {
 
     @GetMapping("/login")
 
-    public ResultVo login(@RequestParam String userName, @RequestParam(value = "passWrod") String passWrod) {
-        ResultVo resultVo = usersService.Login(userName, passWrod);
+    public TokenVo login(@RequestParam String userName, @RequestParam(value = "passWrod") String passWrod) {
+        TokenVo TokenVo = usersService.Login(userName, passWrod);
 
-        return resultVo;
+        return TokenVo;
 
     }
 
     @PostMapping("/resgit")
-    public ResultVo Resgit(@RequestParam String userName, @RequestParam String passWrod) {
+    public TokenVo Resgit(@RequestParam String userName, @RequestParam String passWrod) {
         System.out.println(userName + passWrod);
-        ResultVo resultVo = usersService.Resgit(userName, passWrod);
-        return resultVo;
+        TokenVo TokenVo = usersService.Resgit(userName, passWrod);
+        return TokenVo;
 
     }
 

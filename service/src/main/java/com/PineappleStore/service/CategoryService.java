@@ -19,6 +19,12 @@ public interface CategoryService extends IService<Category> {
 
     ResultVo SelectById(int Id);
 
+
+    ResultVo SelectByCategoryStar();
+
+
+    boolean SelectByCategoryStarCount();
+
     ResultVo UpdateByModel(Category Category);
 
     ResultVo DeleteById(int Id);

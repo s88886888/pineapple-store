@@ -1,7 +1,7 @@
 package com.PineappleStore.service.impl;
 
-import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
+import com.PineappleStore.ResultVo.TokenVo;
 import com.PineappleStore.Utils.Md5Utils;
 import com.PineappleStore.dao.UsersMapper;
 import com.PineappleStore.entity.Users;
@@ -50,7 +50,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
 
     @Override
-    public ResultVo Login(String userName, String passWord) {
+    public TokenVo Login(String userName, String passWord) {
 
 
         boolean checkuser = CheckUserByname(userName);
@@ -84,23 +84,21 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                         .signWith(SignatureAlgorithm.HS256, "Linson_H") //设置加密⽅式和加密密码
                         .compact();//返回字符串
 
-
-                wrapperuser.setToken(token);
-                return new ResultVo("用户登录成功", StatusVo.success, wrapperuser);
+                return new TokenVo("用户登录成功", StatusVo.success, wrapperuser, token);
 
 
             } else {
-                return new ResultVo("用户登录失败，密码错误", StatusVo.Error, null);
+                return new TokenVo("用户登录失败，密码错误", StatusVo.Error, null, null);
             }
         } else {
-            return new ResultVo("用户不存在", StatusVo.Error, null);
+            return new TokenVo("用户不存在", StatusVo.Error, null, null);
         }
 
     }
 
 
     @Transactional
-    public ResultVo Resgit(String userName, String passWord) {
+    public TokenVo Resgit(String userName, String passWord) {
 
         //线程锁
         synchronized (this) {
@@ -127,12 +125,12 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 int i = usersMapper.insert(users);
 
                 if (i > 0) {
-                    return new ResultVo("注册成功", 200, users);
+                    return new TokenVo("注册成功", 200, users, null);
                 } else {
-                    return new ResultVo("注册失败", 404, null);
+                    return new TokenVo("注册失败", 404, null, null);
                 }
             } else {
-                return new ResultVo("用户已经被注册了", 404, null);
+                return new TokenVo("用户已经被注册了", 404, null, null);
             }
         }
     }

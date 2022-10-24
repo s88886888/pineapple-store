@@ -1,6 +1,6 @@
 package com.PineappleStore.service;
 
-import com.PineappleStore.ResultVo.ResultVo;
+import com.PineappleStore.ResultVo.TokenVo;
 import com.PineappleStore.entity.Users;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -15,9 +15,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface UsersService extends IService<Users> {
 
 
-     ResultVo Login(String userName, String passWord);
+     TokenVo Login(String userName, String passWord);
 
-     ResultVo Resgit(String name, String passWord);
+     TokenVo Resgit(String name, String passWord);
 
      boolean CheckUserByname(String userName);
 

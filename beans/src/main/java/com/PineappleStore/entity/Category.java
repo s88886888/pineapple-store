@@ -68,4 +68,10 @@ public class Category implements Serializable {
     private String categoryBgColor;
 
 
+    /**
+     * 推荐商品
+     */
+    private int CategoryStar;
+
+
 }

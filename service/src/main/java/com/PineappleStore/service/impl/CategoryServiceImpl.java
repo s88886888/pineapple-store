@@ -41,34 +41,53 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return new ResultVo("查询成功", StatusVo.success, category);
     }
 
+
+    //查询等级是1 的商品分类
+    @Override
+    public ResultVo SelectByCategoryStar() {
+
+        QueryWrapper<Category> wrapper = new QueryWrapper<>();
+        wrapper.lambda().eq(Category::getCategoryStar, 1);
+        List<Category> category = categoryMapper.selectList(wrapper);
+        return new ResultVo("查询成功", StatusVo.success, category);
+
+    }
+
+    @Override
+    public boolean SelectByCategoryStarCount() {
+
+        QueryWrapper<Category> wrapper = new QueryWrapper<>();
+        wrapper.lambda().eq(Category::getCategoryStar, 1);
+        Long categoryCount = categoryMapper.selectCount(wrapper);
+
+        return categoryCount < 10;
+    }
+
     @Override
     public ResultVo AddModel(Category category) {
 
         if (SelectByNameForBoolean(category.getCategoryName())) {
-            return new ResultVo("增加失败:已经存在这个名字", StatusVo.Error, category);
+            return new ResultVo("增加失败:已经存在相同名字", StatusVo.Error, category);
+        }
+        if (category.getCategoryStar() == 1 && !SelectByCategoryStarCount()) {
+            return new ResultVo("增加失败:推荐商品不能超过数量:10", StatusVo.Error, null);
         } else {
             int i = categoryMapper.insert(category);
-
-
             if (i > 0) {
-
                 return new ResultVo("增加成功", StatusVo.success, null);
             } else {
                 return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
             }
-
-
         }
     }
+
 
     @Override
     public boolean SelectByIdForBoolean(int Id) {
 
-
         Category category = categoryMapper.selectById(Id);
+
         return category != null;
-
-
     }
 
 
@@ -94,6 +113,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public ResultVo UpdateByModel(Category category) {
 
+
+        if (category.getCategoryStar() == 1 && !SelectByCategoryStarCount()) {
+            return new ResultVo("更新失败:推荐商品不能超过数量:10", StatusVo.Error, null);
+        }
         if (SelectByIdForBoolean(category.getCategoryId())) {
             categoryMapper.updateById(category);
             return new ResultVo("更新成功", StatusVo.success, null);

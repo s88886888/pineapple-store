@@ -61,4 +61,10 @@ public class ProductImg implements Serializable {
     private Date updatedTime;
 
 
+    /**
+     * 是否为推荐的商品图片
+     */
+    private int productStar;
+
+
 }

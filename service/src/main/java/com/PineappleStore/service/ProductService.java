@@ -35,6 +35,9 @@ public interface ProductService extends IService<Product> {
 
     ResultVo SelectByProductCount(int num);
 
+
+    ResultVo selectAllByCategoryId(String Id);
+
     boolean SelectByIdForBoolean(String Id);
 
     boolean SelectByNameForBoolean(String Name);

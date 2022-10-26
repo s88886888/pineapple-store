@@ -49,9 +49,9 @@ public class ProductController {
     @GetMapping("/getId/{id}")
     public ResultVo SelectByIdForProductImg(@PathVariable int id) {
 
-        ResultVo resultVo = productService.SelectByIdForProductImg(id);
+       return productService.SelectByIdForProductImg(id);
 
-        return resultVo;
+
     }
 
     @PutMapping("/")
@@ -64,9 +64,9 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResultVo DeleteById(@PathVariable String id) {
-        ResultVo resultVo = productService.DeleteById(id);
+        return productService.DeleteById(id);
 
-        return resultVo;
+
     }
 
     @PostMapping("/")
@@ -82,6 +82,15 @@ public class ProductController {
     public ResultVo SelectByCategoryStar() {
 
         ResultVo resultVo = productService.SelectBygetCategoryStar();
+
+        return resultVo;
+    }
+
+
+    @GetMapping("/selectAllByCategoryId/{id}")
+    public ResultVo selectAllByCategoryId(@PathVariable String id) {
+
+        ResultVo resultVo = productService.selectAllByCategoryId(id);
 
         return resultVo;
     }

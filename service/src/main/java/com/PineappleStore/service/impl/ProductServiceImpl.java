@@ -102,6 +102,20 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
+    public ResultVo selectAllByCategoryId(String Id) {
+
+        List<ProductVo> ProductVo = ProductMapper.selectJoinList(ProductVo.class, new MPJLambdaWrapper<ProductVo>()
+                .selectAll(Product.class)
+                .selectAll(ProductImg.class)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .eq(Product::getCategoryId, Id)
+        );
+
+        return new ResultVo("查询成功", StatusVo.success, ProductVo);
+
+    }
+
+    @Override
     public ResultVo AddModel(Product product) {
 
         if (SelectByNameForBoolean(product.getProductName())) {

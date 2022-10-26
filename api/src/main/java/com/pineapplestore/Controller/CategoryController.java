@@ -66,5 +66,15 @@ public class CategoryController {
         return resultVo;
     }
 
+
+    @GetMapping("/CategoryStar")
+    public ResultVo SelectByCategoryStar() {
+
+        ResultVo resultVo = categoryService.SelectByCategoryStar();
+
+        return resultVo;
+    }
+
+
 }
 

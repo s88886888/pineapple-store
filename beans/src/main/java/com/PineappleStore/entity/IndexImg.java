@@ -82,8 +82,15 @@ public class IndexImg implements Serializable {
     /**
      * 更新时间 更新
      */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+
     private Date updateTime;
+
+
+    /**
+     * 图片在无法正确显示的时候起到文本替代
+     */
+
+    private String describes;
 
 
 }

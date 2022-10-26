@@ -17,4 +17,27 @@ public interface ProductService extends IService<Product> {
 
     ResultVo SelectByAll();
 
+    ResultVo SelectById(int Id);
+
+
+    ResultVo SelectAllForProductImg();
+
+    ResultVo SelectByIdForProductImg(int Id);
+
+
+    ResultVo SelectBygetCategoryStar();
+
+    ResultVo UpdateByModel(Product Product);
+
+    ResultVo DeleteById(String Id);
+
+    ResultVo AddModel(Product Product);
+
+    ResultVo SelectByProductCount(int num);
+
+    boolean SelectByIdForBoolean(String Id);
+
+    boolean SelectByNameForBoolean(String Name);
+
+
 }

@@ -2,12 +2,11 @@ package com.pineapplestore.Controller;
 
 
 import com.PineappleStore.ResultVo.ResultVo;
+import com.PineappleStore.entity.Product;
 import com.PineappleStore.service.ProductService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -32,5 +31,59 @@ public class ProductController {
         return resultVo;
     }
 
+
+    @GetMapping("/getList")
+    public ResultVo SelectAllForProductImg() {
+        ResultVo resultVo = productService.SelectAllForProductImg();
+        return resultVo;
+    }
+
+
+    @GetMapping("/Id/{id}")
+    public ResultVo SelectById(@PathVariable int id) {
+        ResultVo resultVo = productService.SelectById(id);
+
+        return resultVo;
+    }
+
+    @GetMapping("/getId/{id}")
+    public ResultVo SelectByIdForProductImg(@PathVariable int id) {
+
+        ResultVo resultVo = productService.SelectByIdForProductImg(id);
+
+        return resultVo;
+    }
+
+    @PutMapping("/")
+    public ResultVo UpdateByModel(@RequestBody Product product) {
+
+        ResultVo resultVo = productService.UpdateByModel(product);
+
+        return resultVo;
+    }
+
+    @DeleteMapping("/{id}")
+    public ResultVo DeleteById(@PathVariable String id) {
+        ResultVo resultVo = productService.DeleteById(id);
+
+        return resultVo;
+    }
+
+    @PostMapping("/")
+    public ResultVo AddModel(@RequestBody Product product) {
+
+        ResultVo resultVo = productService.AddModel(product);
+
+        return resultVo;
+    }
+
+    //关联商品分类等级是1 的商品
+    @GetMapping("/SelectByCategoryStar")
+    public ResultVo SelectByCategoryStar() {
+
+        ResultVo resultVo = productService.SelectBygetCategoryStar();
+
+        return resultVo;
+    }
 }
 

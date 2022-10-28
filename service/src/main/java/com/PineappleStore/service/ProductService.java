@@ -25,7 +25,8 @@ public interface ProductService extends IService<Product> {
     ResultVo SelectByIdForProductImg(int Id);
 
 
-    ResultVo SelectBygetCategoryStar();
+    //1为轮播图 ，2为商品推送板块
+    ResultVo SelectByCategoryStar(int star);
 
     ResultVo UpdateByModel(Product Product);
 

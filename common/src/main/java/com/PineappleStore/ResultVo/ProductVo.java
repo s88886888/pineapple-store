@@ -99,7 +99,7 @@ public class ProductVo {
     /**
      * 原价
      */
-    private int OriginalPrice;
+    private int originalPrice;
 
 
     /**

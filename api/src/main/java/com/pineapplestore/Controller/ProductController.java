@@ -115,6 +115,15 @@ public class ProductController {
 
     }
 
+    @GetMapping("/getProduct/{id}")
+    @ApiOperation(value = "根据字段CategoryId进行分页查询所有商品", notes = "根据字段CategoryId进行分页查询所有商品")
+    public ResultVo SelectByCategoryStar(@PathVariable int id, @RequestParam int current, @RequestParam int size) {
+
+        ResultVo resultVo = productService.selectByCategoryId(id, current, size);
+
+        return resultVo;
+    }
+
 
 }
 

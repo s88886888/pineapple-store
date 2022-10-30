@@ -5,6 +5,7 @@ import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.Product;
 import com.PineappleStore.service.ProductService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,20 +27,23 @@ public class ProductController {
 
 
     @GetMapping("/List")
+    @ApiOperation(value = "获取全部数据", notes = "获取全部数据")
     public ResultVo SelectByAll() {
-        ResultVo resultVo = productService.SelectByAll();
-        return resultVo;
+        return productService.SelectByAll();
+
     }
 
 
     @GetMapping("/getList")
-    public ResultVo SelectAllForProductImg() {
-        ResultVo resultVo = productService.SelectAllForProductImg();
+    @ApiOperation(value = "获取所有商品数据（含图片价格）", notes = "获取所有商品数据包含图片价格")
+    public ResultVo SelectAllForProductImgAndProductSku(@RequestParam int current, @RequestParam int size) {
+        ResultVo resultVo = productService.SelectByAllForProductImgAndProductSku(current, size);
         return resultVo;
     }
 
 
     @GetMapping("/Id/{id}")
+    @ApiOperation(value = "根据ID获取一条数据", notes = "根据ID获取一条数据")
     public ResultVo SelectById(@PathVariable int id) {
         ResultVo resultVo = productService.SelectById(id);
 
@@ -47,22 +51,41 @@ public class ProductController {
     }
 
     @GetMapping("/getId/{id}")
+    @ApiOperation(value = "根据ID获取一条商品数据（含图片）", notes = "根据ID获取一条商品数据（含图片）")
     public ResultVo SelectByIdForProductImg(@PathVariable int id) {
 
-       return productService.SelectByIdForProductImg(id);
+        return productService.SelectByIdForProductImg(id);
 
+    }
+
+
+    @GetMapping("/getProductId/{id}")
+    @ApiOperation(value = "根据一条id获取商品（图片价格）", notes = "根据一条id获取商品（图片价格）")
+    public ResultVo selectByIdForProductImgAndProductSku(@PathVariable String id) {
+
+        return productService.selectByIdForProductImgAndProductSku(id);
+
+    }
+
+
+    @GetMapping("/getProductName{name}")
+    @ApiOperation(value = "根据商品名字查找（图片价格）", notes = "根据一条id获取商品（图片价格）")
+    public ResultVo selectByNameForProductImgAndProductSku(@PathVariable String name, @RequestParam int current, @RequestParam int size) {
+
+        return productService.selectByNameForProductImgAndProductSku(name, current, size);
 
     }
 
     @PutMapping("/")
+    @ApiOperation(value = "更新数据", notes = "提交model进行更新")
     public ResultVo UpdateByModel(@RequestBody Product product) {
 
-        ResultVo resultVo = productService.UpdateByModel(product);
+        return productService.UpdateByModel(product);
 
-        return resultVo;
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "根据一条id进行删除数据", notes = "传入单id")
     public ResultVo DeleteById(@PathVariable String id) {
         return productService.DeleteById(id);
 
@@ -70,30 +93,26 @@ public class ProductController {
     }
 
     @PostMapping("/")
+    @ApiOperation(value = "增加一条数据", notes = "提交model进行增加数据")
     public ResultVo AddModel(@RequestBody Product product) {
-
-        ResultVo resultVo = productService.AddModel(product);
-
-        return resultVo;
+        return productService.AddModel(product);
     }
 
     //关联商品分类等级是1 的商品
     @GetMapping("/SelectByCategoryStar/{star}")
+    @ApiOperation(value = "根据商品分类推荐等级商品", notes = "1：为轮播图  2为今日特价")
     public ResultVo SelectByCategoryStar(@PathVariable int star) {
-
-
-        ResultVo resultVo = productService.SelectByCategoryStar(star);
-
-        return resultVo;
+        return productService.SelectByCategoryStar(star);
     }
 
 
     @GetMapping("/selectAllByCategoryId/{id}")
+    @ApiOperation(value = "根据商品分类id获取商品", notes = "根据商品分类id获取商品")
     public ResultVo selectAllByCategoryId(@PathVariable String id) {
 
-        ResultVo resultVo = productService.selectAllByCategoryId(id);
+        return productService.selectAllByCategoryIdForProductImgAndProductSku(id);
 
-        return resultVo;
+
     }
 
 

@@ -30,46 +30,31 @@ public class IndexImgController {
     @GetMapping("/List")
     @ApiOperation(value = "获取全部数据", notes = "获取全部数据")
     public ResultVo SelectByAll() {
-
-        ResultVo resultVo = indexImgService.SelectByAll();
-
-        return resultVo;
-
-
+        return indexImgService.SelectByAll();
     }
 
     @GetMapping("/getId/{id}")
     @ApiOperation(value = "根据ID获取一条数据", notes = "根据ID获取一条数据")
     public ResultVo SelectById(@PathVariable String id) {
-        ResultVo resultVo = indexImgService.SelectById(id);
-
-        return resultVo;
+        return indexImgService.SelectById(id);
     }
 
     @PutMapping("/")
     @ApiOperation(value = "更新数据", notes = "提交model进行更新")
     public ResultVo UpdateByModel(@RequestBody IndexImg indexImg) {
-
-        ResultVo resultVo = indexImgService.UpdateByModel(indexImg);
-
-        return resultVo;
+        return indexImgService.UpdateByModel(indexImg);
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "根据一条id进行删除数据", notes = "传入单id")
     public ResultVo DeleteById(@PathVariable String id) {
-        ResultVo resultVo = indexImgService.DeleteById(id);
-
-        return resultVo;
+        return indexImgService.DeleteById(id);
     }
 
     @PostMapping("/")
     @ApiOperation(value = "增加一条数据", notes = "提交model进行增加数据")
     public ResultVo AddModel(@RequestBody IndexImg indexImg) {
-
-        ResultVo resultVo = indexImgService.AddModel(indexImg);
-
-        return resultVo;
+        return indexImgService.AddModel(indexImg);
     }
 
 }

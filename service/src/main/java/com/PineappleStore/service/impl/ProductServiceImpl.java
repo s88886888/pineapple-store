@@ -232,4 +232,20 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
 
     }
+
+
+    @Override
+    public ResultVo selectByCategoryId(int id, int current, int size) {
+
+        IPage<ProductVo> ProductVo = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, new MPJLambdaWrapper<ProductVo>()
+                .selectAll(Product.class)
+                .selectAll(ProductImg.class)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                .eq(Product::getCategoryId, id)
+        );
+
+        return new ResultVo("查询成功", StatusVo.success, ProductVo);
+    }
 }

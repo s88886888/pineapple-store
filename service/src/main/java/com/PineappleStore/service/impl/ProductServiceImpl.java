@@ -8,6 +8,7 @@ import com.PineappleStore.dao.ProductMapper;
 import com.PineappleStore.entity.Category;
 import com.PineappleStore.entity.Product;
 import com.PineappleStore.entity.ProductImg;
+import com.PineappleStore.entity.ProductSku;
 import com.PineappleStore.service.ProductService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -79,14 +80,15 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     //关联商品分类等级是1 的商品
     @Override
-    public ResultVo SelectBygetCategoryStar() {
-
-
-        QueryWrapper<Product> wrapper = new QueryWrapper<>();
-        List<Product> product = ProductMapper.selectJoinList(Product.class, new MPJLambdaWrapper<Product>()
+    public ResultVo SelectByCategoryStar(int star) {
+        List<ProductVo> product = ProductMapper.selectJoinList(ProductVo.class, new MPJLambdaWrapper<Product>()
                 .selectAll(Product.class)
+                .selectAll(ProductImg.class)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
                 .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId)
-                .eq(Category::getCategoryStar, 1)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                .eq(Category::getCategoryStar, star)
         );
         return new ResultVo("查询成功", StatusVo.success, product);
 

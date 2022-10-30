@@ -44,10 +44,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     //查询等级是1 的商品分类
     @Override
-    public ResultVo SelectByCategoryStar() {
+    public ResultVo SelectByCategoryStar(int Star) {
 
         QueryWrapper<Category> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(Category::getCategoryStar, 1);
+        wrapper.lambda().eq(Category::getCategoryStar, Star);
         List<Category> category = categoryMapper.selectList(wrapper);
         return new ResultVo("查询成功", StatusVo.success, category);
 

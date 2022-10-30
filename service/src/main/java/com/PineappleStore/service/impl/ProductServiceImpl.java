@@ -11,6 +11,8 @@ import com.PineappleStore.entity.ProductImg;
 import com.PineappleStore.entity.ProductSku;
 import com.PineappleStore.service.ProductService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Override
     public ResultVo SelectById(int Id) {
         Product product = ProductMapper.selectById(Id);
+
         return new ResultVo("查询成功", StatusVo.success, product);
     }
 
@@ -68,11 +71,13 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
 
     @Override
-    public ResultVo SelectAllForProductImg() {
-        List<ProductVo> ProductVo = ProductMapper.selectJoinList(ProductVo.class, new MPJLambdaWrapper<ProductVo>()
+    public ResultVo SelectByAllForProductImgAndProductSku(int current, int size) {
+        IPage<ProductVo> ProductVo = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, new MPJLambdaWrapper<ProductVo>()
                 .selectAll(Product.class)
                 .selectAll(ProductImg.class)
-                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId));
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId));
 
         return new ResultVo("查询成功", StatusVo.success, ProductVo);
     }
@@ -104,17 +109,57 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
-    public ResultVo selectAllByCategoryId(String Id) {
+    public ResultVo selectAllByCategoryIdForProductImgAndProductSku(String Id) {
 
         List<ProductVo> ProductVo = ProductMapper.selectJoinList(ProductVo.class, new MPJLambdaWrapper<ProductVo>()
                 .selectAll(Product.class)
                 .selectAll(ProductImg.class)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
                 .eq(Product::getCategoryId, Id)
         );
 
         return new ResultVo("查询成功", StatusVo.success, ProductVo);
 
+    }
+
+    @Override
+    public ResultVo selectByIdForProductImgAndProductSku(String Id) {
+
+        List<ProductVo> ProductVo = ProductMapper.selectJoinList(ProductVo.class, new MPJLambdaWrapper<ProductVo>()
+                .selectAll(Product.class)
+                .selectAll(ProductImg.class)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                .eq(Product::getProductId, Id)
+        );
+
+/*        System.out.println("当前页码："+page.getCurrent());
+
+        System.out.println("每页显示："+page.getSize());
+
+        System.out.println("一共多少页："+page.getPages());
+
+        System.out.println("一共多少条："+page.getTotal());*/
+
+        return new ResultVo("查询成功", StatusVo.success, ProductVo);
+    }
+
+    @Override
+    public ResultVo selectByNameForProductImgAndProductSku(String Name, int current, int size) {
+
+        IPage<ProductVo> ProductVo = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, new MPJLambdaWrapper<ProductVo>()
+                .selectAll(Product.class)
+                .selectAll(ProductImg.class)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                .like(Product::getProductName, Name)
+        );
+
+        return new ResultVo("查询成功", StatusVo.success, ProductVo);
     }
 
     @Override

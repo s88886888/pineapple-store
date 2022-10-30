@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -93,5 +94,18 @@ public class ProductVo {
      * 更新时间
      */
     private Date updatedTime;
+
+
+    /**
+     * 原价
+     */
+    private int OriginalPrice;
+
+
+    /**
+     * 折扣
+     */
+    private BigDecimal discounts;
+
 
 }

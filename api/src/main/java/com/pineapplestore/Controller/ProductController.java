@@ -78,10 +78,11 @@ public class ProductController {
     }
 
     //关联商品分类等级是1 的商品
-    @GetMapping("/SelectByCategoryStar")
-    public ResultVo SelectByCategoryStar() {
+    @GetMapping("/SelectByCategoryStar/{star}")
+    public ResultVo SelectByCategoryStar(@PathVariable int star) {
 
-        ResultVo resultVo = productService.SelectBygetCategoryStar();
+
+        ResultVo resultVo = productService.SelectByCategoryStar(star);
 
         return resultVo;
     }
@@ -94,5 +95,7 @@ public class ProductController {
 
         return resultVo;
     }
+
+
 }
 

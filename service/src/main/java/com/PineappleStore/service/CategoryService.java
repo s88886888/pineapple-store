@@ -20,7 +20,7 @@ public interface CategoryService extends IService<Category> {
     ResultVo SelectById(int Id);
 
 
-    ResultVo SelectByCategoryStar();
+    ResultVo SelectByCategoryStar(int Star);
 
 
     boolean SelectByCategoryStarCount();

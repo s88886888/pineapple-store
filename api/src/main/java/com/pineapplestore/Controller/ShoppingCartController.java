@@ -38,6 +38,19 @@ public class ShoppingCartController {
         return shoppingCartService.SelectById(id);
     }
 
+
+    @GetMapping("/getUserId/{id}")
+    @ApiOperation(value = "根据用户ID获取一条数据", notes = "根据用户ID获取一条数据")
+    public ResultVo SelectByUserid(@PathVariable String id) {
+        return shoppingCartService.SelectByUserid(id);
+    }
+
+    @GetMapping("/getCartId/{id}")
+    @ApiOperation(value = "根据购物车ID获取一条数据", notes = "根据用户ID获取一条数据")
+    public ResultVo SelectByIdForproduct(@PathVariable int id) {
+        return shoppingCartService.SelectByIdForproduct(id);
+    }
+
     @PutMapping("/")
     @ApiOperation(value = "更新数据", notes = "提交model进行更新")
     public ResultVo UpdateByModel(@RequestBody ShoppingCart ShoppingCart) {

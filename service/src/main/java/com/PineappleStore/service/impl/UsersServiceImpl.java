@@ -62,7 +62,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
             QueryWrapper<Users> wrapper = new QueryWrapper<>();
 
-            wrapper.lambda().select(Users::getUsername, Users::getPassword).eq(Users::getUsername, userName).eq(Users::getPassword, md5pwd).last("limit 1");
+            wrapper.lambda().select(Users::getUsername, Users::getPassword, Users::getUserId).eq(Users::getUsername, userName).eq(Users::getPassword, md5pwd).last("limit 1");
 
             Users wrapperuser = usersMapper.selectOne(wrapper);
 

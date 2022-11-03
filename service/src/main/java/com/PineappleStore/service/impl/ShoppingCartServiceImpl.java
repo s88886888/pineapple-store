@@ -1,12 +1,18 @@
 package com.PineappleStore.service.impl;
 
+
 import com.PineappleStore.ResultVo.ResultVo;
+import com.PineappleStore.ResultVo.ShoppingCartVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.ShoppingCartMapper;
+import com.PineappleStore.entity.Product;
+import com.PineappleStore.entity.ProductImg;
+import com.PineappleStore.entity.ProductSku;
 import com.PineappleStore.entity.ShoppingCart;
 import com.PineappleStore.service.ShoppingCartService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,15 +49,82 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     }
 
     @Override
-    public ResultVo AddModel(ShoppingCart ShoppingCart) {
+    public ResultVo SelectByUserid(String Id) {
 
-        ShoppingCart.setCartTime(String.valueOf(new Date()));
 
-        int i = shoppingCartMapper.insert(ShoppingCart);
-        if (i > 0) {
-            return new ResultVo("增加成功", StatusVo.success, null);
+        List<ShoppingCartVo> ShoppingCartVo = shoppingCartMapper.selectJoinList(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCartVo>()
+                .select(Product::getProductName, Product::getCategoryId)
+                .select(ProductImg::getUrl).eq(ProductImg::getIsMain, 1)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                .selectAll(ShoppingCart.class)
+                .leftJoin(Product.class, Product::getProductId, ShoppingCart::getProductId)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, ShoppingCart::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getSkuId, ShoppingCart::getSkuId)
+                .eq(ShoppingCart::getUserId, Id)
+        );
+
+        return new ResultVo("查询成功", StatusVo.success, ShoppingCartVo);
+
+    }
+
+    @Override
+    public ResultVo SelectByIdForproduct(int Id) {
+
+        ShoppingCartVo ShoppingCartVo = shoppingCartMapper.selectJoinOne(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCartVo>()
+
+                .select(Product::getProductName, Product::getCategoryId)
+                .select(ProductImg::getUrl).eq(ProductImg::getIsMain, 1)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                .selectAll(ShoppingCart.class)
+                .leftJoin(Product.class, Product::getProductId, ShoppingCart::getProductId)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, ShoppingCart::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getSkuId, ShoppingCart::getSkuId)
+                .eq(ShoppingCart::getCartId, Id)
+        );
+
+        return new ResultVo("查询成功", StatusVo.success, ShoppingCartVo);
+    }
+
+
+    @Override
+    public ResultVo AddModel(ShoppingCart shoppingCart) {
+
+        QueryWrapper<ShoppingCart> wrapper = new QueryWrapper<>();
+        wrapper.lambda().select(ShoppingCart::getUserId, ShoppingCart::getProductId, ShoppingCart::getCartId, ShoppingCart::getCartNum)
+                .eq(ShoppingCart::getUserId, shoppingCart.getUserId())
+                .eq(ShoppingCart::getProductId, shoppingCart.getProductId());
+
+        ShoppingCart shoppingCartOne = shoppingCartMapper.selectOne(wrapper);
+
+        if (shoppingCartOne != null) {
+
+            shoppingCart.setCartId(shoppingCartOne.getCartId());
+            shoppingCart.setCartTime(shoppingCartOne.getCartTime());
+
+            int cartNum = Integer.parseInt(shoppingCartOne.getCartNum());
+            shoppingCart.setCartNum(String.valueOf(cartNum++));
+
+
+            return UpdateByModel(shoppingCart);
+
         } else {
-            return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
+
+            shoppingCart.setCartTime(String.valueOf(new Date()));
+//            shoppingCart.setCartNum(1);
+
+            shoppingCart.setCartNum("1");
+
+
+            int i = shoppingCartMapper.insert(shoppingCart);
+
+            if (i > 0) {
+
+
+                return new ResultVo("添加购物车成功", StatusVo.success, SelectByIdForproduct(shoppingCart.getCartId()));
+
+            } else {
+                return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
+            }
         }
 
     }
@@ -79,11 +152,11 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     }
 
     @Override
-    public ResultVo UpdateByModel(ShoppingCart ShoppingCart) {
+    public ResultVo UpdateByModel(ShoppingCart shoppingCart) {
 
-        if (SelectByIdForBoolean(ShoppingCart.getCartId())) {
-            shoppingCartMapper.updateById(ShoppingCart);
-            return new ResultVo("更新成功", StatusVo.success, null);
+        if (SelectByIdForBoolean(shoppingCart.getCartId())) {
+            shoppingCartMapper.updateById(shoppingCart);
+            return new ResultVo("修改购物成功", StatusVo.created, shoppingCart);
         } else {
             return new ResultVo("更新失败，该数据不存在", StatusVo.Error, null);
         }

@@ -1,33 +1,20 @@
-package com.PineappleStore.entity;
+package com.PineappleStore.ResultVo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
+import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
-/**
- * <p>
- * 购物车
- * </p>
- *
- * @author Linson
- * @since 2022-10-17
- */
 @Data
-@EqualsAndHashCode(callSuper = false)
-@Accessors(chain = true)
-public class ShoppingCart implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ShoppingCartVo {
 
-    private static final long serialVersionUID = 1L;
 
     /**
-     * 主键
+     * 购物车主键
      */
-    @TableId(value = "cart_id", type = IdType.AUTO)
     private Integer cartId;
 
     /**
@@ -67,7 +54,39 @@ public class ShoppingCart implements Serializable {
 
 
     /**
+     * 商品名称 商品名称
+     */
+    private String productName;
+
+    /**
+     * 分类外键id 分类id
+     */
+    private Integer categoryId;
+
+
+    /**
+     * 图片地址
+     */
+
+    private String url;
+
+
+    /**
+     * 原价
+     */
+    private int originalPrice;
+
+
+    /**
+     * 折扣
+     */
+    private BigDecimal discounts;
+
+
+    /**
      * 是否勾选
      */
     private boolean checkbox;
+
+
 }

@@ -66,4 +66,8 @@ public class ShoppingCart implements Serializable {
     private String skuProps;
 
 
+    /**
+     * 是否勾选
+     */
+    private boolean checkbox;
 }

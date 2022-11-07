@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mybatisplusgenerator.mapper.OrdersMapper">
+<mapper namespace="com.PineappleStore.dao.OrdersMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.example.mybatisplusgenerator.pojo.Orders">
-        <id column="order_id" property="orderId" />
-        <result column="user_id" property="userId" />
-        <result column="untitled" property="untitled" />
-        <result column="receiver_name" property="receiverName" />
-        <result column="receiver_mobile" property="receiverMobile" />
-        <result column="receiver_address" property="receiverAddress" />
-        <result column="total_amount" property="totalAmount" />
-        <result column="actual_amount" property="actualAmount" />
-        <result column="pay_type" property="payType" />
-        <result column="order_remark" property="orderRemark" />
+    <resultMap id="BaseResultMap" type="com.PineappleStore.entity.Orders">
+        <id column="order_id" property="orderId"/>
+        <result column="user_id" property="userId"/>
+        <result column="untitled" property="untitled"/>
+        <result column="receiver_name" property="receiverName"/>
+        <result column="receiver_mobile" property="receiverMobile"/>
+        <result column="receiver_address" property="receiverAddress"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="actual_amount" property="actualAmount"/>
+        <result column="pay_type" property="payType"/>
+        <result column="order_remark" property="orderRemark"/>
         <result column="status" property="status" />
         <result column="delivery_type" property="deliveryType" />
         <result column="delivery_flow_id" property="deliveryFlowId" />

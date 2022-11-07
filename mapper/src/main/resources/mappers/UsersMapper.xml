@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mybatisplusgenerator.mapper.UsersMapper">
+<mapper namespace="com.PineappleStore.dao.UsersMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.example.mybatisplusgenerator.pojo.Users">
-        <id column="user_id" property="userId" />
-        <result column="username" property="username" />
-        <result column="password" property="password" />
-        <result column="nickname" property="nickname" />
-        <result column="realname" property="realname" />
-        <result column="user_img" property="userImg" />
-        <result column="user_mobile" property="userMobile" />
-        <result column="user_email" property="userEmail" />
-        <result column="user_sex" property="userSex" />
-        <result column="user_birth" property="userBirth" />
+    <resultMap id="BaseResultMap" type="com.PineappleStore.entity.Users">
+        <id column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <result column="realname" property="realname"/>
+        <result column="user_img" property="userImg"/>
+        <result column="user_mobile" property="userMobile"/>
+        <result column="user_email" property="userEmail"/>
+        <result column="user_sex" property="userSex"/>
+        <result column="user_birth" property="userBirth"/>
         <result column="user_regtime" property="userRegtime" />
         <result column="user_modtime" property="userModtime" />
     </resultMap>

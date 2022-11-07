@@ -1,6 +1,8 @@
 package com.PineappleStore.service;
 
+import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.Orders;
+import com.PineappleStore.entity.OrdersVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -12,6 +14,19 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2022-10-17
  */
 public interface OrdersService extends IService<Orders> {
+
+
+    ResultVo SelectByAll();
+
+    ResultVo SelectById(String Id);
+
+    ResultVo UpdateByModel(Orders orders);
+
+    ResultVo DeleteById(String Id);
+
+    ResultVo AddModel(OrdersVo orders);
+
+    boolean SelectByIdForBoolean(String Id);
 
 
 }

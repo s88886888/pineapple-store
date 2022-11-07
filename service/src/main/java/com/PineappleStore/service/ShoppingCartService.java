@@ -18,6 +18,10 @@ public interface ShoppingCartService extends IService<ShoppingCart> {
 
     ResultVo SelectById(int Id);
 
+    ResultVo SelectByUserid(String Id);
+
+    ResultVo SelectByIdForproduct(int Id);
+
     ResultVo UpdateByModel(ShoppingCart ShoppingCart);
 
     ResultVo DeleteById(int Id);

@@ -1,7 +1,7 @@
 package com.PineappleStore.dao;
 
 import com.PineappleStore.entity.ShoppingCart;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.github.yulichang.base.MPJBaseMapper;
 
 /**
  * <p>
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author Linson
  * @since 2022-10-17
  */
-public interface ShoppingCartMapper extends BaseMapper<ShoppingCart> {
+public interface ShoppingCartMapper extends MPJBaseMapper<ShoppingCart> {
 
 }

@@ -131,7 +131,7 @@ public class OrdersVo {
 
     ////////////////////////////////////订单快照/////////////////////////////////////////////////
 
-    private List Product;
+    private List<OrderItemVo> Product;
 
 
 }

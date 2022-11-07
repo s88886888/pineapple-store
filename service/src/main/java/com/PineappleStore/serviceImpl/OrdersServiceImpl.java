@@ -3,7 +3,9 @@ package com.PineappleStore.serviceImpl;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
+import com.PineappleStore.dao.OrderItemMapper;
 import com.PineappleStore.dao.OrdersMapper;
+import com.PineappleStore.dao.ShoppingCartMapper;
 import com.PineappleStore.entity.OrderItem;
 import com.PineappleStore.entity.Orders;
 import com.PineappleStore.entity.OrdersVo;
@@ -12,6 +14,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,6 +37,12 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Autowired
     private OrdersMapper ordersMapper;
 
+    @Autowired
+    private OrderItemMapper orderItemMapper;
+
+    @Autowired
+    private ShoppingCartMapper shoppingCartMapper;
+
 
     @Override
     public ResultVo SelectByAll() {
@@ -49,11 +58,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
+    @Transactional
     public ResultVo AddModel(OrdersVo ordersVo) {
-
-
-
-
 
 
         /*订单表*/
@@ -65,43 +71,45 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orders.setOrderId(ordersVo.getOrderId());
         orders.setOrderId(ordersVo.getOrderId());
         orders.setUserId(ordersVo.getUserId());
-        orders.setReceiverAddress(orders.getReceiverAddress());
-        orders.setReceiverName(orders.getReceiverAddress());
-        orders.setReceiverMobile(ordersVo.getReceiverAddress());
+        orders.setReceiverAddress(ordersVo.getReceiverAddress());
+        orders.setReceiverName(ordersVo.getReceiverName());
+        orders.setReceiverMobile(ordersVo.getReceiverMobile());
+        orders.setTotalAmount(ordersVo.getTotalAmount());
         orders.setCreateTime(new Date());
         orders.setUpdateTime(new Date());
 
 
+        int in = ordersMapper.insert(orders);
+
         /*  订单快照表*/
-        OrderItem orderItem = new OrderItem();
-
-
-//        orderItem.setItemId(doOrderNum());
-//
-//        orderItem.setOrderId(ordersVo.getOrderId());
-//        orderItem.setProductId(ordersVo.getProductId());
-//        orderItem.setProductName(ordersVo.getProductName());
-//        orderItem.setSkuId(ordersVo.getSkuId());
-//        orderItem.setSkuName(ordersVo.getSkuName());
-//        orderItem.setProductPrice(ordersVo.getProductPrice());
-//        orderItem.setBuyCounts(ordersVo.getBuyCounts());
-
-
         for (int i = 0; i < ordersVo.getProduct().size(); i++) {
-            System.out.println(ordersVo.getProduct().get(i));
+            OrderItem orderItem = new OrderItem();
+            orderItem.setItemId(doOrderNum());
+            orderItem.setOrderId(ordersVo.getOrderId());
+            orderItem.setProductId(ordersVo.getProduct().get(i).getProductId());
+            orderItem.setProductName(ordersVo.getProduct().get(i).getProductName());
+            orderItem.setSkuId(ordersVo.getProduct().get(i).getSkuId());
+
+//            orderItem.setSkuName(ordersVo.getProduct().get(i).getSkuName());
+            orderItem.setSkuName("测试");
+            orderItem.setProductPrice(ordersVo.getProduct().get(i).getProductPrice());
+            orderItem.setBuyCounts(ordersVo.getProduct().get(i).getCartNum());
+            orderItem.setBuyTime(new Date());
+
+            int isok = orderItemMapper.insert(orderItem);
+            int deleter = shoppingCartMapper.deleteById(ordersVo.getProduct().get(i).getCartId());
+
+            if (isok < 1 || deleter < 1) {
+                throw new RuntimeException("参数错误,事物回滚");
+//              return new ResultVo("结算出错：请稍后再试", StatusVo.Error, ordersVo.getProduct().get(i).getProductName());
+            }
         }
 
-
-        int i = 0;
-
-        if (i > 0) {
-
+        if (in > 0) {
             return new ResultVo("增加成功", StatusVo.success, null);
         } else {
             return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
         }
-
-
     }
 
 
@@ -119,8 +127,6 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     public boolean SelectByIdForBoolean(String Id) {
-
-
         Orders orders = ordersMapper.selectById(Id);
         return orders != null;
 

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mybatisplusgenerator.mapper.IndexImgMapper">
+<mapper namespace="com.PineappleStore.dao.IndexImgMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.example.mybatisplusgenerator.pojo.IndexImg">
-        <id column="img_id" property="imgId" />
-        <result column="img_url" property="imgUrl" />
-        <result column="img_bg_color" property="imgBgColor" />
-        <result column="prod_id" property="prodId" />
-        <result column="category_id" property="categoryId" />
-        <result column="index_type" property="indexType" />
-        <result column="seq" property="seq" />
-        <result column="status" property="status" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
+    <resultMap id="BaseResultMap" type="com.PineappleStore.entity.IndexImg">
+        <id column="img_id" property="imgId"/>
+        <result column="img_url" property="imgUrl"/>
+        <result column="img_bg_color" property="imgBgColor"/>
+        <result column="prod_id" property="prodId"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="index_type" property="indexType"/>
+        <result column="seq" property="seq"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->

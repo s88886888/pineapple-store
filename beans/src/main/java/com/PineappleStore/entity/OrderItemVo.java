@@ -46,6 +46,11 @@ public class OrderItemVo implements Serializable {
     /**
      * 商品图片
      */
+    private String url;
+
+    /**
+     * 商品图片
+     */
     private String productImg;
 
     /**
@@ -66,7 +71,14 @@ public class OrderItemVo implements Serializable {
     /**
      * 购买数量
      */
-    private Integer cartNum;
+    private Integer buyCounts;
+
+
+    /**
+     * 存入购买数量
+     */
+    private Integer CartNum;
+
 
     /**
      * 商品总金额

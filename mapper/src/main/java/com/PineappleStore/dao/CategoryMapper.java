@@ -2,6 +2,7 @@ package com.PineappleStore.dao;
 
 import com.PineappleStore.entity.Category;
 import com.github.yulichang.base.MPJBaseMapper;
+import org.springframework.stereotype.Repository;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.github.yulichang.base.MPJBaseMapper;
  * @author Linson
  * @since 2022-10-17
  */
+@Repository
 public interface CategoryMapper extends MPJBaseMapper<Category> {
 
 }

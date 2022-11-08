@@ -37,17 +37,21 @@ public class ProductController {
     @GetMapping("/getList")
     @ApiOperation(value = "获取所有商品数据（含图片价格）", notes = "获取所有商品数据包含图片价格")
     public ResultVo SelectAllForProductImgAndProductSku(@RequestParam int current, @RequestParam int size) {
-        ResultVo resultVo = productService.SelectByAllForProductImgAndProductSku(current, size);
-        return resultVo;
+        return productService.SelectByAllForProductImgAndProductSku(current, size);
+
+    }
+
+    @GetMapping("/List/{id}")
+    @ApiOperation(value = "根据商品ID获取所有图片", notes = "根据商品表的一个ID获取所有关联子表的图片")
+    public ResultVo SelectByItemid(@PathVariable int id) {
+        return productService.SelectByItemid(id);
     }
 
 
     @GetMapping("/Id/{id}")
     @ApiOperation(value = "根据ID获取一条数据", notes = "根据ID获取一条数据")
     public ResultVo SelectById(@PathVariable int id) {
-        ResultVo resultVo = productService.SelectById(id);
-
-        return resultVo;
+        return productService.SelectById(id);
     }
 
     @GetMapping("/getId/{id}")
@@ -119,9 +123,8 @@ public class ProductController {
     @ApiOperation(value = "根据字段CategoryId进行分页查询所有商品", notes = "根据字段CategoryId进行分页查询所有商品")
     public ResultVo SelectByCategoryStar(@PathVariable int id, @RequestParam int current, @RequestParam int size) {
 
-        ResultVo resultVo = productService.selectByCategoryId(id, current, size);
+        return productService.selectByCategoryId(id, current, size);
 
-        return resultVo;
     }
 
 

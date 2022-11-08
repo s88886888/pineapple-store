@@ -3,13 +3,10 @@ package com.PineappleStore.serviceImpl;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.ProductImgMapper;
-import com.PineappleStore.entity.Product;
 import com.PineappleStore.entity.ProductImg;
-import com.PineappleStore.entity.ProductVo;
 import com.PineappleStore.service.ProductImgService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,17 +55,7 @@ public class ProductImgServiceImpl extends ServiceImpl<ProductImgMapper, Product
         return new ResultVo("查询成功", StatusVo.success, productCount);
     }
 
-    @Override
-    public ResultVo SelectByItemid(int Id) {
 
-        List<ProductVo> product = productImgMapper.selectJoinList(ProductVo.class, new MPJLambdaWrapper<ProductVo>()
-                .selectAll(Product.class)
-                .selectAll(ProductImg.class)
-                .leftJoin(Product.class, Product::getProductId, ProductImg::getItemId)
-                .eq(ProductImg::getItemId, Id));
-
-        return new ResultVo("查询成功", StatusVo.success, product);
-    }
 
     @Override
     public ResultVo AddModel(ProductImg ProductImg) {

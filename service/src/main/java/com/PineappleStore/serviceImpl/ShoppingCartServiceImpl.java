@@ -48,7 +48,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     public ResultVo SelectByUserid(String Id) {
 
 
-        List<ShoppingCartVo> ShoppingCartVo = shoppingCartMapper.selectJoinList(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCartVo>()
+        List<ShoppingCartVo> ShoppingCartVo = shoppingCartMapper.selectJoinList(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCart>()
                 .select(Product::getProductName, Product::getCategoryId)
                 .select(ProductImg::getUrl).eq(ProductImg::getIsMain, 1)
                 .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
@@ -66,7 +66,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Override
     public ResultVo SelectByIdForproduct(int Id) {
 
-        ShoppingCartVo ShoppingCartVo = shoppingCartMapper.selectJoinOne(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCartVo>()
+        ShoppingCartVo ShoppingCartVo = shoppingCartMapper.selectJoinOne(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCart>()
 
                 .select(Product::getProductName, Product::getCategoryId)
                 .select(ProductImg::getUrl).eq(ProductImg::getIsMain, 1)

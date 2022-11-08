@@ -9,6 +9,7 @@ import com.PineappleStore.dao.ShoppingCartMapper;
 import com.PineappleStore.entity.OrderItem;
 import com.PineappleStore.entity.Orders;
 import com.PineappleStore.entity.OrdersVo;
+import com.PineappleStore.entity.ProductImg;
 import com.PineappleStore.service.OrdersService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.base.MPJBaseServiceImpl;
@@ -63,10 +64,19 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     public ResultVo SelectByUserId(String Id) {
 
 
-        List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, new MPJLambdaWrapper<Orders>()
+        MPJLambdaWrapper<Orders> mpjLambdaWrapper = new MPJLambdaWrapper<Orders>()
                 .selectAll(Orders.class)
+
+
+                //嵌套查询
+                .selectCollection(OrderItem.class, OrdersVo::getProductList)
                 .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
-                .eq(Orders::getUserId, Id));
+                .leftJoin(ProductImg.class, ProductImg::getItemId, OrderItem::getProductId)
+                .eq(Orders::getUserId, Id);
+
+
+        List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, mpjLambdaWrapper);
+
 
         return new ResultVo("查询成功", StatusVo.success, orders);
     }
@@ -102,6 +112,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
             orderItem.setOrderId(ordersVo.getOrderId());
             orderItem.setProductId(ordersVo.getProductList().get(i).getProductId());
             orderItem.setProductName(ordersVo.getProductList().get(i).getProductName());
+            orderItem.setProductImg(ordersVo.getProductList().get(i).getUrl());
             orderItem.setSkuId(ordersVo.getProductList().get(i).getSkuId());
 
 //            orderItem.setSkuName(ordersVo.getProduct().get(i).getSkuName());

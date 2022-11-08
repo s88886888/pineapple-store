@@ -1,7 +1,11 @@
 package com.PineappleStore.dao;
 
 import com.PineappleStore.entity.Orders;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.PineappleStore.entity.OrdersVo;
+import com.github.yulichang.base.MPJBaseMapper;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * <p>
@@ -11,7 +15,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author Linson
  * @since 2022-10-17
  */
-public interface OrdersMapper extends BaseMapper<Orders> {
+@Repository
+public interface OrdersMapper extends MPJBaseMapper<Orders> {
 
+    List<OrdersVo> SelectByIdUserId(String id);
 
 }

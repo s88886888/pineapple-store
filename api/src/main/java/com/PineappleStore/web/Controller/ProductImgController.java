@@ -35,14 +35,6 @@ public class ProductImgController {
     }
 
 
-    @GetMapping("/List/{id}")
-    @ApiOperation(value = "根据商品ID获取所有图片", notes = "根据商品表的一个ID获取所有关联子表的图片")
-    public ResultVo SelectByItemid(@PathVariable int id) {
-        ResultVo resultVo = productImgService.SelectByItemid(id);
-        return resultVo;
-    }
-
-
     @GetMapping("/Id/{id}")
     @ApiOperation(value = "根据主表ID获取一条数据", notes = "根据ID获取一条数据")
     public ResultVo SelectById(@PathVariable int id) {

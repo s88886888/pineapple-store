@@ -9,9 +9,11 @@ import com.PineappleStore.dao.ShoppingCartMapper;
 import com.PineappleStore.entity.OrderItem;
 import com.PineappleStore.entity.Orders;
 import com.PineappleStore.entity.OrdersVo;
+import com.PineappleStore.entity.ProductImg;
 import com.PineappleStore.service.OrdersService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.yulichang.base.MPJBaseServiceImpl;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +33,8 @@ import java.util.UUID;
  * @since 2022-10-17
  */
 @Service
-public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> implements OrdersService {
+
+public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> implements OrdersService {
 
 
     @Autowired
@@ -54,6 +57,27 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public ResultVo SelectById(String Id) {
         Orders orders = ordersMapper.selectById(Id);
+        return new ResultVo("查询成功", StatusVo.success, orders);
+    }
+
+    @Override
+    public ResultVo SelectByUserId(String Id) {
+
+
+        MPJLambdaWrapper<Orders> mpjLambdaWrapper = new MPJLambdaWrapper<Orders>()
+                .selectAll(Orders.class)
+
+
+                //嵌套查询
+                .selectCollection(OrderItem.class, OrdersVo::getProductList)
+                .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, OrderItem::getProductId)
+                .eq(Orders::getUserId, Id);
+
+
+        List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, mpjLambdaWrapper);
+
+
         return new ResultVo("查询成功", StatusVo.success, orders);
     }
 
@@ -82,22 +106,23 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         int in = ordersMapper.insert(orders);
 
         /*  订单快照表*/
-        for (int i = 0; i < ordersVo.getProduct().size(); i++) {
+        for (int i = 0; i < ordersVo.getProductList().size(); i++) {
             OrderItem orderItem = new OrderItem();
             orderItem.setItemId(doOrderNum());
             orderItem.setOrderId(ordersVo.getOrderId());
-            orderItem.setProductId(ordersVo.getProduct().get(i).getProductId());
-            orderItem.setProductName(ordersVo.getProduct().get(i).getProductName());
-            orderItem.setSkuId(ordersVo.getProduct().get(i).getSkuId());
+            orderItem.setProductId(ordersVo.getProductList().get(i).getProductId());
+            orderItem.setProductName(ordersVo.getProductList().get(i).getProductName());
+            orderItem.setProductImg(ordersVo.getProductList().get(i).getUrl());
+            orderItem.setSkuId(ordersVo.getProductList().get(i).getSkuId());
 
 //            orderItem.setSkuName(ordersVo.getProduct().get(i).getSkuName());
             orderItem.setSkuName("测试");
-            orderItem.setProductPrice(ordersVo.getProduct().get(i).getProductPrice());
-            orderItem.setBuyCounts(ordersVo.getProduct().get(i).getCartNum());
+            orderItem.setProductPrice(ordersVo.getProductList().get(i).getProductPrice());
+            orderItem.setBuyCounts(ordersVo.getProductList().get(i).getCartNum());
             orderItem.setBuyTime(new Date());
 
             int isok = orderItemMapper.insert(orderItem);
-            int deleter = shoppingCartMapper.deleteById(ordersVo.getProduct().get(i).getCartId());
+            int deleter = shoppingCartMapper.deleteById(ordersVo.getProductList().get(i).getCartId());
 
             if (isok < 1 || deleter < 1) {
                 throw new RuntimeException("参数错误,事物回滚");

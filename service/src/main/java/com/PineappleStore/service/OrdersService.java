@@ -3,7 +3,7 @@ package com.PineappleStore.service;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.Orders;
 import com.PineappleStore.entity.OrdersVo;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.yulichang.base.MPJBaseService;
 
 /**
  * <p>
@@ -13,12 +13,14 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Linson
  * @since 2022-10-17
  */
-public interface OrdersService extends IService<Orders> {
+public interface OrdersService extends MPJBaseService<Orders> {
 
 
     ResultVo SelectByAll();
 
     ResultVo SelectById(String Id);
+
+    ResultVo SelectByUserId(String Id);
 
     ResultVo UpdateByModel(Orders orders);
 

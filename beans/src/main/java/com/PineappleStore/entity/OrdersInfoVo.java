@@ -1,22 +1,18 @@
 package com.PineappleStore.entity;
 
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class OrdersVo implements Serializable {
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
 
-
+public class OrdersInfoVo {
     /**
      * 订单ID 同时也是订单编号
      */
@@ -130,9 +126,67 @@ public class OrdersVo implements Serializable {
     private Integer closeType;
 
 
-    ////////////////////////////////////订单快照/////////////////////////////////////////////////
+    /**
+     * 订单项ID
+     */
 
-    private List<OrderItemVo> productList;
+    private String itemId;
 
+
+    /**
+     * 商品ID
+     */
+    private String productId;
+
+    /**
+     * 商品名称
+     */
+    private String productName;
+
+    /**
+     * 商品图片
+     */
+    private String productImg;
+
+    /**
+     * skuID
+     */
+    private String skuId;
+
+    /**
+     * sku名称
+     */
+    private String skuName;
+
+    /**
+     * 商品价格
+     */
+    private BigDecimal productPrice;
+
+    /**
+     * 购买数量
+     */
+    private Integer cartNum;
+
+
+    /**
+     * 加入购物车时间
+     */
+    private Date basketDate;
+
+    /**
+     * 购买时间
+     */
+    private Date buyTime;
+
+    /**
+     * 评论状态： 0 未评价  1 已评价
+     */
+    private Integer isComment;
+
+    /**
+     * 购物车ID
+     */
+    private String cartId;
 
 }

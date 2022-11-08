@@ -18,19 +18,108 @@
         <result column="delivery_type" property="deliveryType" />
         <result column="delivery_flow_id" property="deliveryFlowId" />
         <result column="order_freight" property="orderFreight" />
-        <result column="delete_status" property="deleteStatus" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
-        <result column="pay_time" property="payTime" />
-        <result column="delivery_time" property="deliveryTime" />
-        <result column="flish_time" property="flishTime" />
-        <result column="cancel_time" property="cancelTime" />
-        <result column="close_type" property="closeType" />
+        <result column="delete_status" property="deleteStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="delivery_time" property="deliveryTime"/>
+        <result column="flish_time" property="flishTime"/>
+        <result column="cancel_time" property="cancelTime"/>
+        <result column="close_type" property="closeType"/>
+    </resultMap>
+
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="OrdersVoMap" type="com.PineappleStore.entity.OrdersVo">
+        <id column="order_id" property="orderId"/>
+        <result column="user_id" property="userId"/>
+        <result column="untitled" property="untitled"/>
+        <result column="receiver_name" property="receiverName"/>
+        <result column="receiver_mobile" property="receiverMobile"/>
+        <result column="receiver_address" property="receiverAddress"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="actual_amount" property="actualAmount"/>
+        <result column="pay_type" property="payType"/>
+        <result column="order_remark" property="orderRemark"/>
+        <result column="status" property="status"/>
+        <result column="delivery_type" property="deliveryType"/>
+        <result column="delivery_flow_id" property="deliveryFlowId"/>
+        <result column="order_freight" property="orderFreight"/>
+        <result column="delete_status" property="deleteStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="delivery_time" property="deliveryTime"/>
+        <result column="flish_time" property="flishTime"/>
+        <result column="cancel_time" property="cancelTime"/>
+        <result column="close_type" property="closeType"/>
+
+
+        <collection property="productList" column="user_id" ofType="com.PineappleStore.entity.OrderItemVo"
+                    select="SelectByIdUserId">
+            <!--            <id column="item_id" property="itemId"/>-->
+            <!--            <result column="order_id" property="orderId"/>-->
+            <!--            <result column="product_id" property="productId"/>-->
+            <!--            <result column="product_name" property="productName"/>-->
+            <!--            <result column="product_img" property="productImg"/>-->
+            <!--            <result column="sku_id" property="skuId"/>-->
+            <!--            <result column="sku_name" property="skuName"/>-->
+            <!--            <result column="product_price" property="productPrice"/>-->
+            <!--            <result column="buy_counts" property="cartNum"/>-->
+            <!--            <result column="total_amount" property="totalAmount"/>-->
+            <!--            <result column="basket_date" property="basketDate" />-->
+            <!--            <result column="buy_time" property="buyTime" />-->
+            <!--            <result column="is_comment" property="isComment" />-->
+        </collection>
+
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        order_id, user_id, untitled, receiver_name, receiver_mobile, receiver_address, total_amount, actual_amount, pay_type, order_remark, status, delivery_type, delivery_flow_id, order_freight, delete_status, create_time, update_time, pay_time, delivery_time, flish_time, cancel_time, close_type
+        order_id
+        , user_id, untitled, receiver_name, receiver_mobile, receiver_address, total_amount, actual_amount, pay_type, order_remark, status, delivery_type, delivery_flow_id, order_freight, delete_status, create_time, update_time, pay_time, delivery_time, flish_time, cancel_time, close_type
     </sql>
+
+
+    <select id="SelectByIdUserId" resultType="com.PineappleStore.entity.OrdersVo">
+        SELECT t.order_id,
+               t.user_id,
+               t.untitled,
+               t.receiver_name,
+               t.receiver_mobile,
+               t.receiver_address,
+               t.total_amount,
+               t.actual_amount,
+               t.pay_type,
+               t.order_remark,
+               t.status,
+               t.delivery_type,
+               t.delivery_flow_id,
+               t.order_freight,
+               t.delete_status,
+               t.create_time,
+               t.update_time,
+               t.pay_time,
+               t.delivery_time,
+               t.flish_time,
+               t.cancel_time,
+               t.close_type,
+               t1.item_id,
+               t1.order_id,
+               t1.product_id,
+               t1.product_name,
+               t1.product_img,
+               t1.sku_id,
+               t1.sku_name,
+               t1.product_price,
+               t1.buy_counts,
+               t1.total_amount,
+               t1.basket_date,
+               t1.buy_time,
+               t1.is_comment
+        FROM orders t
+                 LEFT JOIN order_item t1 ON (t1.order_id = t.order_id)
+        WHERE (t.user_id = #{user_id})
+    </select>
 
 </mapper>

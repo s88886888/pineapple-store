@@ -29,8 +29,6 @@ public interface ProductImgService extends IService<ProductImg> {
     ResultVo SelectByProductImgCount(int num);
 
 
-    ResultVo SelectByItemid(int Id);
-
 
     boolean SelectByIdForBoolean(String Id);
 

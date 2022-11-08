@@ -40,6 +40,12 @@ public class OrdersController {
         return ordersService.SelectById(id);
     }
 
+    @GetMapping("/getOrder/{id}")
+    @ApiOperation(value = "根据用户ID获取一条数据", notes = "根据用户ID获取一条数据")
+    public ResultVo SelectByUserId(@PathVariable String id) {
+        return ordersService.SelectByUserId(id);
+    }
+
     @PutMapping("/")
     @ApiOperation(value = "更新数据", notes = "提交model进行更新")
     public ResultVo UpdateByModel(@RequestBody Orders orders) {

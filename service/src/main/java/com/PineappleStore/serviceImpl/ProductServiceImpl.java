@@ -87,7 +87,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .selectAll(ProductImg.class)
                 .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
                 .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId)
-                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
                 .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
                 .eq(Category::getCategoryStar, star)
         );

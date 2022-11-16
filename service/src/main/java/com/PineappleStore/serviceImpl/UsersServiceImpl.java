@@ -50,12 +50,14 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
 
     @Override
+
     public TokenVo Login(String userName, String passWord, String loginToken) throws Exception {
 
 
         if (!DingxiangUi.Checktoken(loginToken)) {
-            return new TokenVo("验证码过期请重试", StatusVo.Error, null, null);
+            return new TokenVo("验证码过期", StatusVo.Error, null, null);
         }
+
 
         boolean checkuser = CheckUserByname(userName);
 
@@ -71,12 +73,17 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
             Users wrapperuser = usersMapper.selectOne(wrapper);
 
+
+            if (wrapperuser == null) {
+                return new TokenVo("用户登录失败，密码错误", StatusVo.Error, null, null);
+            }
+
+
             if (md5pwd.equals(wrapperuser.getPassword())) {
 
                 JwtBuilder builder = new DefaultJwtBuilder();
 
                 Map<String, Object> map = new HashMap<>();
-
 
                 map.put("Username", userName);
                 String token = builder.setSubject(userName) //就是 token中携带的数据 支持链式调用
@@ -100,18 +107,22 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     }
 
 
+    @Override
     @Transactional
-    public TokenVo Resgit(String userName, String passWord, String loginToken) {
+    public TokenVo resgit(String userName, String passWord, String resgitToken) throws Exception {
 
         //线程锁
         synchronized (this) {
 
-            boolean checkuser = CheckUserByname(userName);
+            if (!DingxiangUi.Checktoken(resgitToken)) {
+                return new TokenVo("验证码过期", StatusVo.Error, null, null);
+            }
 
-            if (checkuser) {
-//                Date datetime = new Date(); // 注意是util包下的Date
-//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//                String date = sdf.format(datetime);
+
+            boolean checker = CheckUserByname(userName);
+
+            if (!checker) {
+
                 String md5pwd = Md5Utils.md5(passWord);//md5密码加密
                 Users users = new Users();
                 users.setUsername(userName);

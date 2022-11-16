@@ -31,8 +31,8 @@ public class UsersController {
     }
 
     @PostMapping("/resgit")
-    public TokenVo Resgit(@RequestParam String userName, @RequestParam String passWrod, @RequestParam String loginToken) {
-        return usersService.Resgit(userName, passWrod, loginToken);
+    public TokenVo Resgit(@RequestParam String userName, @RequestParam String passWrod, @RequestParam String resgitToken) throws Exception {
+        return usersService.resgit(userName, passWrod, resgitToken);
     }
 
 

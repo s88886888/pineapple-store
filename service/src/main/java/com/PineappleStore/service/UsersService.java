@@ -17,7 +17,7 @@ public interface UsersService extends IService<Users> {
 
      TokenVo Login(String userName, String passWord, String loginToken) throws Exception;
 
-     TokenVo Resgit(String name, String passWord, String loginToken);
+     TokenVo resgit(String name, String passWord, String loginToken) throws Exception;
 
      boolean CheckUserByname(String userName);
 

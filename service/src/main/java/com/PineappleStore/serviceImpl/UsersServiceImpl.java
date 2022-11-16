@@ -2,6 +2,7 @@ package com.PineappleStore.serviceImpl;
 
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.ResultVo.TokenVo;
+import com.PineappleStore.Utils.DingxiangUi;
 import com.PineappleStore.Utils.Md5Utils;
 import com.PineappleStore.dao.UsersMapper;
 import com.PineappleStore.entity.Users;
@@ -43,25 +44,30 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         checkwrapper.lambda().select(Users::getUsername).eq(Users::getUsername, userName).last("limit 1");
         Users checkuser = usersMapper.selectOne(checkwrapper);
 
-        return checkuser == null;
+        return checkuser != null;
 
     }
 
 
     @Override
-    public TokenVo Login(String userName, String passWord) {
+    public TokenVo Login(String userName, String passWord, String loginToken) throws Exception {
 
+
+        if (!DingxiangUi.Checktoken(loginToken)) {
+            return new TokenVo("验证码过期请重试", StatusVo.Error, null, null);
+        }
 
         boolean checkuser = CheckUserByname(userName);
 
-
-        if (!checkuser) {
+        if (checkuser) {
 
             String md5pwd = Md5Utils.md5(passWord);
 
             QueryWrapper<Users> wrapper = new QueryWrapper<>();
 
-            wrapper.lambda().select(Users::getUsername, Users::getPassword, Users::getUserId).eq(Users::getUsername, userName).eq(Users::getPassword, md5pwd).last("limit 1");
+            wrapper.lambda().select(Users::getUsername, Users::getPassword, Users::getUserId)
+                    .eq(Users::getUsername, userName)
+                    .eq(Users::getPassword, md5pwd);
 
             Users wrapperuser = usersMapper.selectOne(wrapper);
 
@@ -77,7 +83,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
                         .setIssuedAt(new Date()) //设置token的⽣成时间
                         .setId(wrapperuser.getUserId() + "") //设置⽤户id为 token id
-
                         .setClaims(map) //map中可以存 放⽤户的⻆⾊权限信息
                         .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) //设置过期时间
                         .signWith(SignatureAlgorithm.HS256, "Linson_H") //设置加密⽅式和加密密码
@@ -92,12 +97,11 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         } else {
             return new TokenVo("用户不存在", StatusVo.Error, null, null);
         }
-
     }
 
 
     @Transactional
-    public TokenVo Resgit(String userName, String passWord) {
+    public TokenVo Resgit(String userName, String passWord, String loginToken) {
 
         //线程锁
         synchronized (this) {
@@ -108,11 +112,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 //                Date datetime = new Date(); // 注意是util包下的Date
 //                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 //                String date = sdf.format(datetime);
-
-
                 String md5pwd = Md5Utils.md5(passWord);//md5密码加密
-
-
                 Users users = new Users();
                 users.setUsername(userName);
                 users.setPassword(md5pwd);

@@ -15,9 +15,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface UsersService extends IService<Users> {
 
 
-     TokenVo Login(String userName, String passWord);
+     TokenVo Login(String userName, String passWord, String loginToken) throws Exception;
 
-     TokenVo Resgit(String name, String passWord);
+     TokenVo Resgit(String name, String passWord, String loginToken);
 
      boolean CheckUserByname(String userName);
 

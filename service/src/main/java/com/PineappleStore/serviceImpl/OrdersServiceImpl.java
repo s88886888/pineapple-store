@@ -72,7 +72,8 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 .selectCollection(OrderItem.class, OrdersVo::getProductList)
                 .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, OrderItem::getProductId)
-                .eq(Orders::getUserId, Id);
+                .eq(Orders::getUserId, Id)
+                .orderByDesc(Orders::getCreateTime);
 
 
         List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, mpjLambdaWrapper);

@@ -75,13 +75,13 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 Map<String, Object> map = new HashMap<>();
 
                 map.put("Username", userName);
-                String token = builder.setSubject(userName) //就是 token中携带的数据 支持链式调用
 
+                String token = builder.setSubject(userName) //token中携带的数据 支持链式调用
                         .setIssuedAt(new Date()) //设置token的⽣成时间
                         .setId(user.getUserId() + "") //设置⽤户id为 token id
                         .setClaims(map) //map中可以存 放⽤户的⻆⾊权限信息
                         .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) //设置过期时间
-                        .signWith(SignatureAlgorithm.HS256, "Linson_H") //设置加密⽅式和加密密码
+                        .signWith(SignatureAlgorithm.HS256, "Linson_H") //设置加密⽅式和 加密的密钥
                         .compact();//返回字符串
 
                 return new TokenVo("用户登录成功", StatusVo.success, user, token);

@@ -71,7 +71,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         IPage<ProductVo> ProductVo = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, new MPJLambdaWrapper<Product>()
                 .selectAll(Product.class)
                 .selectAll(ProductImg.class)
-                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
                 .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId));
 

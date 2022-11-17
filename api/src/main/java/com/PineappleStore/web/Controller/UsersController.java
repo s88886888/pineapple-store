@@ -24,23 +24,18 @@ public class UsersController {
     @Autowired
     private UsersService usersService;
 
-    @GetMapping("/login")
-
-    public TokenVo login(@RequestParam String userName, @RequestParam(value = "passWrod") String passWrod) {
-        TokenVo TokenVo = usersService.Login(userName, passWrod);
-
-        return TokenVo;
-
+    @PostMapping("/login")
+    @ResponseBody
+    public TokenVo login(@RequestParam String userName, @RequestParam String passWrod, @RequestParam String loginToken) throws Exception {
+        return usersService.Login(userName, passWrod, loginToken);
     }
 
     @PostMapping("/resgit")
-    public TokenVo Resgit(@RequestParam String userName, @RequestParam String passWrod) {
-        System.out.println(userName + passWrod);
-        TokenVo TokenVo = usersService.Resgit(userName, passWrod);
-        return TokenVo;
-
+    public TokenVo Resgit(@RequestParam String userName, @RequestParam String passWrod, @RequestParam String resgitToken) throws Exception {
+        return usersService.resgit(userName, passWrod, resgitToken);
     }
 
 
 }
+
 

@@ -23,28 +23,28 @@ public class TokenInterceptor implements HandlerInterceptor {
 
         String token = request.getHeader("token");
 
-//        查看需要放行的URL
-//        System.out.println(request.getRequestURI());
+
 
         if (token == null) {
-            ResultVo resultVO = new ResultVo("未检测到token，请先登录！", StatusVo.Error, null);
+            ResultVo resultVO = new ResultVo("未检测到token，请先登录！", StatusVo.noToken, null);
             doResponse(response, resultVO);
         } else {
             
             try {
                 JwtParser jwtParser = Jwts.parser();
+                //token 密钥 用于解析前端接受的token
                 jwtParser.setSigningKey("Linson_h");
                 Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token);
             } catch (ExpiredJwtException e) {
-                ResultVo resultVo = new ResultVo("请先登录", StatusVo.Error, null);
+                ResultVo resultVo = new ResultVo("请先登录", StatusVo.noToken, null);
                 doResponse(response, resultVo);
                 return false;
             } catch (UnsupportedJwtException e) {
-                ResultVo resultVo = new ResultVo("Token系统不识别", StatusVo.Error, null);
+                ResultVo resultVo = new ResultVo("Token系统不识别", StatusVo.noToken, null);
                 doResponse(response, resultVo);
                 return false;
             } catch (Exception e) {
-                ResultVo resultVO = new ResultVo("未检测到token失效，请先登录！", StatusVo.Error, null);
+                ResultVo resultVO = new ResultVo("未检测到token失效，请先登录！", StatusVo.noToken, null);
                 doResponse(response, resultVO);
                 return false;
             }

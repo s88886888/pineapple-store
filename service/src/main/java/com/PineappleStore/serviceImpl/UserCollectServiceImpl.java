@@ -67,7 +67,9 @@ public class UserCollectServiceImpl extends ServiceImpl<UserCollectMapper, UserC
 
 
         QueryWrapper<UserCollect> wrapper = new QueryWrapper<>();
-        wrapper.lambda().select(UserCollect::getProductId).eq(UserCollect::getUserId, userCollect.getUserId());
+        wrapper.lambda().select(UserCollect::getProductId)
+                .eq(UserCollect::getProductId, userCollect.getProductId())
+                .eq(UserCollect::getUserId, userCollect.getUserId());
         UserCollect Collect = userCollectMapper.selectOne(wrapper);
 
         if (Collect == null) {

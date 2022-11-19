@@ -259,7 +259,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                     return new ResultVo("系统错误，请稍后再试", StatusVo.wrong, null);
                 }
                 //发送验证码
-                //            client.execute(request);
+                client.execute(request);
                 return new ResultVo("验证码发送成功，验证码有效期5分钟", StatusVo.success, null);
             } else {
                 return new ResultVo("手机号码已经被注册", StatusVo.Error, null);

@@ -33,8 +33,8 @@ public class UserAddrServiceImpl extends ServiceImpl<UserAddrMapper, UserAddr> i
     @Override
     public ResultVo SelectByAll() {
         QueryWrapper<UserAddr> wrapper = new QueryWrapper<>();
-        List<UserAddr> IndexImgList = userAddrMapper.selectList(wrapper);
-        return new ResultVo("查询成功", StatusVo.success, IndexImgList);
+        List<UserAddr> UserAddrList = userAddrMapper.selectList(wrapper);
+        return new ResultVo("查询成功", StatusVo.success, UserAddrList);
     }
 
     @Override
@@ -46,7 +46,8 @@ public class UserAddrServiceImpl extends ServiceImpl<UserAddrMapper, UserAddr> i
     @Override
     public ResultVo SelectByUserId(String userId) {
         QueryWrapper<UserAddr> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(UserAddr::getUserId, userId);
+        wrapper.lambda().eq(UserAddr::getUserId, userId)
+                .orderByDesc(UserAddr::getCreateTime);
 
 
         List<UserAddr> UserAddr = userAddrMapper.selectList(wrapper);

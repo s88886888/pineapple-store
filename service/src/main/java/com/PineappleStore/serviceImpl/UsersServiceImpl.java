@@ -241,8 +241,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 Map<String, Integer> code = new HashMap<>();
                 code.put("code", phoneCode);
                 send.put("params", code);
-
-
                 request.setBizContent(String.valueOf(send));
                 request.setMethod("sms.message.send");
 

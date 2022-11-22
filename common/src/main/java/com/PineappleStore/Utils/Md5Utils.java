@@ -1,7 +1,11 @@
 package com.PineappleStore.Utils;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+
 import java.security.MessageDigest;
 
+@Component
 public class Md5Utils {
 
 
@@ -60,15 +64,27 @@ public class Md5Utils {
 //    }
 
 
-    // 测试主函数
-//    public static void main(String args[]) {
-//        String s = new String("1233");
-//        System.out.println("原始：" + s);
-//        System.out.println("MD5后：" + md5(s));
-//        System.out.println("加密的：" + convertMD5(s));
-//        System.out.println("解密的：" + convertMD5(convertMD5(s)));
-//
-//    }
+    @Bean
+    public void checkmd5() {
+
+        String passWord = new String("Linson");
+
+        if (passWord.equals(convertMD5(convertMD5(passWord)))) {
+            System.out.println("---------------------------MD5加密环境配置成功---------------------------");
+            System.out.println("原始：" + passWord);
+            System.out.println("MD5后：" + md5(passWord));
+            System.out.println("加密的：" + convertMD5(passWord));
+            System.out.println("解密的：" + convertMD5(convertMD5(passWord)));
+
+        } else {
+            System.out.println("---------------------------MD5加密环境配置失败---------------------------");
+            System.out.println("原始密文：" + passWord);
+            System.out.println("MD5后的密文：" + md5(passWord));
+            System.out.println("加密后的密文：" + convertMD5(passWord));
+            System.out.println("加密后的密文：" + convertMD5(convertMD5(passWord)));
+        }
+
+    }
 
 
 }

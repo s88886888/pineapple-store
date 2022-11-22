@@ -214,10 +214,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
 
                 Client client = new Client();
-                client.setAppId("hw_10023");     //开发者ID，在【设置】-【开发设置】中获取
-                client.setSecretKey("0a35e267a5ab0e665b9a407031d94d71");    //开发者密钥，在【设置】-【开发设置】中获取
-                client.setVersion("1.0");
-
                 Client.Request request = new Client.Request();
 
                 //创建json 发送对象
@@ -231,7 +227,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 Set<String> phoneList = new HashSet<>();
                 phoneList.add(phone);
                 send.put("mobile", phoneList);
-
                 send.put("type", 0);
                 send.put("template_id", "ST_2020101100000005");
                 send.put("sign", "闪速码");
@@ -241,8 +236,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 Map<String, Integer> code = new HashMap<>();
                 code.put("code", phoneCode);
                 send.put("params", code);
-
-
                 request.setBizContent(String.valueOf(send));
                 request.setMethod("sms.message.send");
 
@@ -252,14 +245,12 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 model.setCode(String.valueOf(phoneCode));
                 model.setCreateTime(new Date());
                 model.setExpirationTime(afterDate);
-
-
                 int i = userChenckMapper.insert(model);
                 if (i < 1) {
                     return new ResultVo("系统错误，请稍后再试", StatusVo.wrong, null);
                 }
                 //发送验证码
-                //            client.execute(request);
+                client.execute(request);
                 return new ResultVo("验证码发送成功，验证码有效期5分钟", StatusVo.success, null);
             } else {
                 return new ResultVo("手机号码已经被注册", StatusVo.Error, null);

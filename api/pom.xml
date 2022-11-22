@@ -48,6 +48,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!--        未配置 Spring Boot 配置注解处理器-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
 
     </dependencies>
 

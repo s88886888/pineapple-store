@@ -1,5 +1,8 @@
 package com.PineappleStore.Utils;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -11,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 
+@Component
 public class Client {
 
     private String appId;
@@ -21,13 +25,16 @@ public class Client {
 
     public Client() {
         this.timestamp = System.currentTimeMillis();
-        this.version = "1.0";
         this.signType = "md5";
+        this.appId = "hw_10023";     //开发者ID，在【设置】-【开发设置】中获取
+        this.secretKey = "0a35e267a5ab0e665b9a407031d94d71";   //开发者密钥，在【设置】-【开发设置】中获取
+        this.version = "1.0";
+//        System.out.println("---------------------------闪速度码环境配置成功---------------------------");
     }
 
     public static String md5(String s) {
-        char str[] = new char[32];
-        char hex[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        char[] str = new char[32];
+        char[] hex = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
         try {
             MessageDigest md = MessageDigest.getInstance("md5");
             byte[] b = md.digest(s.getBytes());
@@ -40,6 +47,16 @@ public class Client {
             ex.printStackTrace();
         }
         return new String(str);
+    }
+
+    @Bean
+    public void getClient() {
+        this.timestamp = System.currentTimeMillis();
+        this.signType = "md5";
+        this.appId = "hw_10023";     //开发者ID，在【设置】-【开发设置】中获取
+        this.secretKey = "0a35e267a5ab0e665b9a407031d94d71";   //开发者密钥，在【设置】-【开发设置】中获取
+        this.version = "1.0";
+        System.out.println("---------------------------闪速码环境配置成功---------------------------");
     }
 
     public void setAppId(String appId) {

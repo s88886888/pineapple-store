@@ -99,13 +99,24 @@ public class ProductVo {
     /**
      * 原价
      */
-    private int originalPrice;
+    private Integer originalPrice;
 
 
     /**
      * 折扣
      */
     private BigDecimal discounts;
+
+
+    /**
+     * skuID
+     */
+    private String skuId;
+
+    /**
+     * sku名称
+     */
+    private String skuName;
 
 
 }

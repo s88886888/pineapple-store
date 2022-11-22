@@ -5,12 +5,13 @@ import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.OrderItemMapper;
 import com.PineappleStore.dao.OrdersMapper;
+import com.PineappleStore.dao.ProductMapper;
 import com.PineappleStore.dao.ShoppingCartMapper;
-import com.PineappleStore.entity.OrderItem;
-import com.PineappleStore.entity.Orders;
-import com.PineappleStore.entity.OrdersVo;
-import com.PineappleStore.entity.ProductImg;
+import com.PineappleStore.entity.*;
 import com.PineappleStore.service.OrdersService;
+import com.alipay.easysdk.factory.Factory;
+import com.alipay.easysdk.kernel.util.ResponseChecker;
+import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +48,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
     @Autowired
     private ShoppingCartMapper shoppingCartMapper;
+
+    @Autowired
+    private ProductMapper productMapper;
 
 
     @Override
@@ -86,7 +92,6 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     @Transactional
     public ResultVo AddModel(OrdersVo ordersVo) {
 
-
         /*订单表*/
 
         UUID uuid = UUID.randomUUID();
@@ -94,47 +99,86 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
         Orders orders = new Orders();
         orders.setOrderId(ordersVo.getOrderId());
-        orders.setOrderId(ordersVo.getOrderId());
         orders.setUserId(ordersVo.getUserId());
         orders.setReceiverAddress(ordersVo.getReceiverAddress());
         orders.setReceiverName(ordersVo.getReceiverName());
         orders.setReceiverMobile(ordersVo.getReceiverMobile());
-        orders.setTotalAmount(ordersVo.getTotalAmount());
+//        orders.setTotalAmount(ordersVo.getTotalAmount());
         orders.setCreateTime(new Date());
         orders.setUpdateTime(new Date());
 
 
-        int in = ordersMapper.insert(orders);
+
 
         /*  订单快照表*/
+
+        //选中的商品 的总价
+        BigDecimal TotalAmount = new BigDecimal("0");
+
         for (int i = 0; i < ordersVo.getProductList().size(); i++) {
+
             OrderItem orderItem = new OrderItem();
+
             orderItem.setItemId(doOrderNum());
             orderItem.setOrderId(ordersVo.getOrderId());
-            orderItem.setProductId(ordersVo.getProductList().get(i).getProductId());
-            orderItem.setProductName(ordersVo.getProductList().get(i).getProductName());
-            orderItem.setProductImg(ordersVo.getProductList().get(i).getUrl());
-            orderItem.setSkuId(ordersVo.getProductList().get(i).getSkuId());
 
+            orderItem.setProductId(ordersVo.getProductList().get(i).getProductId());
+
+
+            MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
+                    .select(Product::getProductName)
+                    .select(ProductImg::getUrl)
+                    .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId, ProductSku::getSkuName)
+                    .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                    .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                    .eq(ProductImg::getIsMain, "1")
+                    .eq(Product::getProductId, ordersVo.getProductList().get(i).getProductId());
+            ProductVo selectJoinOne = productMapper.selectJoinOne(ProductVo.class, wrapper);
+
+
+            orderItem.setProductName(selectJoinOne.getProductName());
+            orderItem.setProductImg(selectJoinOne.getUrl());
+
+            orderItem.setSkuId(selectJoinOne.getSkuId());
 //            orderItem.setSkuName(ordersVo.getProduct().get(i).getSkuName());
             orderItem.setSkuName("测试");
-            orderItem.setProductPrice(ordersVo.getProductList().get(i).getProductPrice());
+
+
+            //商品价格
+            orderItem.setProductPrice(selectJoinOne.getDiscounts().multiply(BigDecimal.valueOf(selectJoinOne.getOriginalPrice())));
+            //商品数量
             orderItem.setBuyCounts(ordersVo.getProductList().get(i).getCartNum());
+
+            //商品总价
+            orderItem.setTotalAmount(orderItem.getProductPrice().multiply(BigDecimal.valueOf(orderItem.getBuyCounts())));
+
+
+            TotalAmount = TotalAmount.add(orderItem.getTotalAmount());
+
             orderItem.setBuyTime(new Date());
+
+
+            //订单总价
+
 
             int isok = orderItemMapper.insert(orderItem);
             int deleter = shoppingCartMapper.deleteById(ordersVo.getProductList().get(i).getCartId());
 
             if (isok < 1 || deleter < 1) {
                 throw new RuntimeException("参数错误,事物回滚");
-//              return new ResultVo("结算出错：请稍后再试", StatusVo.Error, ordersVo.getProduct().get(i).getProductName());
             }
         }
+        orders.setTotalAmount(TotalAmount);
+        orders.setUntitled("测试ing" + TotalAmount);
+        orders.setStatus("1");
+        int in = ordersMapper.insert(orders);
 
         if (in > 0) {
-            return new ResultVo("增加成功", StatusVo.success, null);
+            return new ResultVo("清单确认成功：请支付", StatusVo.success, orders);
         } else {
-            return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
+
+            throw new RuntimeException("参数错误,事物回滚");
+//            return new ResultVo("结算失败：请检查库存", StatusVo.Error, null);
         }
     }
 
@@ -192,4 +236,46 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
 
+    public ResultVo aliPay(String orderId) {
+
+
+        QueryWrapper<Orders> wrapper = new QueryWrapper<>();
+        wrapper.lambda().select(Orders::getTotalAmount, Orders::getUntitled)
+                .eq(Orders::getOrderId, orderId)
+                .eq(Orders::getStatus, "1");
+
+        Orders orders = ordersMapper.selectOne(wrapper);
+
+        if (orders == null) {
+            return new ResultVo("该订单不存在", StatusVo.Error, orderId);
+        }
+
+        //BigDecimal 切割两位小数
+        DecimalFormat df1 = new DecimalFormat("0.00");
+        String totalAmount = df1.format(orders.getTotalAmount());
+
+        try {
+            // 2. 发起API调用 电脑收银台 二维码+账号登录
+            AlipayTradePagePayResponse response = Factory.Payment.Page()
+                    //设置15分钟未支付，则此次支付失败，因为订单过期了
+                    .optional("timeout_express", "15m")
+                    .pay(orders.getUntitled(), orderId, totalAmount, "");
+
+            //当面付款 只生成二维码
+//            AlipayTradePrecreateResponse response = Payment.FaceToFace()
+//                    .preCreate("Apple iPhone11 128G", "2234567890", "5799.00");
+
+            // 3. 处理响应或异常
+            if (ResponseChecker.success(response)) {
+                return new ResultVo("调用成功", StatusVo.success, response.getBody());
+            } else {
+                System.out.println(response.toString());
+                return new ResultVo("调用失败", StatusVo.Error, response.getBody());
+            }
+        } catch (Exception e) {
+            System.err.println("调用遭遇异常，原因：" + e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
+//            return new ResultVo("支付异常，原因:" + e.getMessage(), StatusVo.wrong, null);
+        }
+    }
 }

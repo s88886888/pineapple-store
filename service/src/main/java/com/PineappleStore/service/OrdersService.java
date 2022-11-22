@@ -30,5 +30,7 @@ public interface OrdersService extends MPJBaseService<Orders> {
 
     boolean SelectByIdForBoolean(String Id);
 
+    ResultVo aliPay(String orderId);
+
 
 }

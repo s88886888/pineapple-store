@@ -29,9 +29,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public ResultVo SelectByAll() {
+
+        //定义一个规则集合
         QueryWrapper<Category> wrapper = new QueryWrapper<>();
+
+        //"sql "
         List<Category> categoryList = categoryMapper.selectList(wrapper);
+
         return new ResultVo("查询成功", StatusVo.success, categoryList);
+
     }
 
     @Override

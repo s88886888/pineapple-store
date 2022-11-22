@@ -2,8 +2,23 @@ package com.PineappleStore.Utils;
 
 import com.dingxianginc.ctu.client.CaptchaClient;
 import com.dingxianginc.ctu.client.model.CaptchaResponse;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DingxiangCheck {
+
+
+    @Bean
+    public void getDingXiangCheck() throws Exception {
+
+        if (Checktoken("1234567890000000000000000000Linson")) {
+            System.out.println("---------------------------顶象验证环境配置失败请检查服务是否过期---------------------------");
+        } else {
+            System.out.println("---------------------------顶象验证环境配置成功---------------------------");
+        }
+    }
+
 
     public static boolean Checktoken(String token) throws Exception {
         /**构造入参为appId和appSecret

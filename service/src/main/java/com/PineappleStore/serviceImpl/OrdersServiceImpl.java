@@ -19,13 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * <p>
@@ -278,4 +276,47 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 //            return new ResultVo("支付异常，原因:" + e.getMessage(), StatusVo.wrong, null);
         }
     }
+
+    @Override
+    public ResultVo aliPayNotify(HttpServletRequest request) throws Exception {
+
+        if ("TRADE_SUCCESS".equals(request.getParameter("trade_status"))) {
+            Map<String, String> params = new HashMap<>();
+            Map<String, String[]> requestParams = request.getParameterMap();
+            for (String name : requestParams.keySet()) {
+                params.put(name, request.getParameter(name));
+//                System.out.println((name + " = " + request.getParameter(name)));
+            }
+            // 支付宝验签
+            if (Factory.Payment.Common().verifyNotify(params)) {
+
+//                System.out.println("交易名称: " + params.get("subject"));
+//                System.out.println("交易状态: " + params.get("trade_status"));
+//                System.out.println("支付宝交易凭证号: " + params.get("trade_no"));
+//                System.out.println("商户订单号: " + params.get("out_trade_no"));
+//                System.out.println("交易金额: " + params.get("total_amount"));
+//                System.out.println("买家在支付宝唯一id: " + params.get("buyer_id"));
+//                System.out.println("买家付款时间: " + params.get("gmt_payment"));
+//                System.out.println("买家付款金额: " + params.get("buyer_pay_amount"));
+
+                Orders orders = new Orders();
+                //订单支付状态
+                orders.setStatus("2");
+                //订单支付时间
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date date = simpleDateFormat.parse(params.get("gmt_payment"));
+                orders.setPayTime(date);
+                orders.setOrderId(params.get("out_trade_no"));
+                orders.setUpdateTime(new Date());
+                orders.setPayType(2);
+                ordersMapper.updateById(orders);
+            }
+//            return "success";
+            return new ResultVo("支付成功", StatusVo.success, null);
+        }
+//        return "failed";
+        return new ResultVo("支付失败", StatusVo.Error, null);
+    }
+
+
 }

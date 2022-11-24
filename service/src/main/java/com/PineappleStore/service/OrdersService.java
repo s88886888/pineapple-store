@@ -5,6 +5,8 @@ import com.PineappleStore.entity.Orders;
 import com.PineappleStore.entity.OrdersVo;
 import com.github.yulichang.base.MPJBaseService;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * <p>
  * 订单  服务类
@@ -31,6 +33,8 @@ public interface OrdersService extends MPJBaseService<Orders> {
     boolean SelectByIdForBoolean(String Id);
 
     ResultVo aliPay(String orderId);
+
+    ResultVo aliPayNotify(HttpServletRequest request) throws Exception;
 
 
 }

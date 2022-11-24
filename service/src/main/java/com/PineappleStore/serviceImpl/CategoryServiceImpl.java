@@ -3,10 +3,11 @@ package com.PineappleStore.serviceImpl;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.CategoryMapper;
-import com.PineappleStore.entity.Category;
+import com.PineappleStore.entity.*;
 import com.PineappleStore.service.CategoryService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,10 +52,17 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public ResultVo SelectByCategoryStar(int Star) {
 
-        QueryWrapper<Category> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(Category::getCategoryStar, Star);
-        List<Category> category = categoryMapper.selectList(wrapper);
-        return new ResultVo("查询成功", StatusVo.success, category);
+        MPJLambdaWrapper<Category> wrapper = new MPJLambdaWrapper<Category>()
+
+                .selectAll(Category.class).eq(Category::getCategoryStar, Star)
+                .selectCollection(Product.class, CategoryVO::getProductList, map -> map.collection(ProductImg.class, ProductListVo::getImgList))
+                .leftJoin(Product.class, Product::getCategoryId, Category::getCategoryId)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
+                .orderByAsc(Category::getCategoryId);
+
+
+        List<CategoryVO> data = categoryMapper.selectJoinList(CategoryVO.class, wrapper);
+        return new ResultVo("查询成功", StatusVo.success, data);
 
     }
 

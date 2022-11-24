@@ -70,8 +70,6 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
         MPJLambdaWrapper<Orders> mpjLambdaWrapper = new MPJLambdaWrapper<Orders>()
                 .selectAll(Orders.class)
-
-
                 //嵌套查询
                 .selectCollection(OrderItem.class, OrdersVo::getProductList)
                 .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
@@ -137,6 +135,8 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
             orderItem.setProductName(selectJoinOne.getProductName());
             orderItem.setProductImg(selectJoinOne.getUrl());
 
+
+            //库存待完善
             orderItem.setSkuId(selectJoinOne.getSkuId());
 //            orderItem.setSkuName(ordersVo.getProduct().get(i).getSkuName());
             orderItem.setSkuName("测试");
@@ -243,6 +243,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 .eq(Orders::getStatus, "1");
 
         Orders orders = ordersMapper.selectOne(wrapper);
+
+        Date date = new Date();
+//        orders.getCreateTime()data.
 
         if (orders == null) {
             return new ResultVo("该订单不存在", StatusVo.Error, orderId);

@@ -14,22 +14,22 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(tokenInterceptor)
+//        registry.addInterceptor(tokenInterceptor)
 
-                .addPathPatterns("/**")//拦截所有
-
-                .excludePathPatterns("/users/**")//放行用户登录
-                .excludePathPatterns("/index-img/**")//放行轮播图
-                .excludePathPatterns("/category/**")//商品分类
-                .excludePathPatterns("/product/**")//商品信息
-                .excludePathPatterns("/productimg/**")//商品图片
-
-                .excludePathPatterns("/swagger-ui/**")//放行swagger
-                .excludePathPatterns("/doc.html/**")//放行doc
-                .excludePathPatterns("/swagger-resources/**")
-                .excludePathPatterns("/v2/api-docs")
-                .excludePathPatterns("/error")
-                .excludePathPatterns("/webjars/**");
+//                .addPathPatterns("/**")//拦截所有
+//
+//                .excludePathPatterns("/users/**")//放行用户登录
+//                .excludePathPatterns("/index-img/**")//放行轮播图
+//                .excludePathPatterns("/category/**")//商品分类
+//                .excludePathPatterns("/product/**")//商品信息
+//                .excludePathPatterns("/productimg/**")//商品图片
+//
+//                .excludePathPatterns("/swagger-ui/**")//放行swagger
+//                .excludePathPatterns("/doc.html/**")//放行doc
+//                .excludePathPatterns("/swagger-resources/**")
+//                .excludePathPatterns("/v2/api-docs")
+//                .excludePathPatterns("/error")
+//                .excludePathPatterns("/webjars/**");
 
 
     }

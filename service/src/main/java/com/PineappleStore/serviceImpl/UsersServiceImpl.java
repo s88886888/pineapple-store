@@ -68,14 +68,20 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
 
-    public TokenVo Login(String userName, String passWord, String loginToken) throws Exception {
+    public TokenVo Login(String userAccount, String passWord, String loginToken, int loginType) throws Exception {
 
         if (DingxiangCheck.Checktoken(loginToken)) {
 
-            String md5pwd = Md5Utils.md5(passWord);
 
+            String md5pwd = Md5Utils.md5(passWord);
             QueryWrapper<Users> wrapper = new QueryWrapper<>();
-            wrapper.lambda().select(Users::getUsername, Users::getPassword, Users::getUserId).eq(Users::getUsername, userName).eq(Users::getPassword, md5pwd);
+            if (loginType == 1) {
+                wrapper.lambda().select(Users::getUserMobile, Users::getUsername, Users::getPassword, Users::getUserId).eq(Users::getUsername, userAccount)
+                        .eq(Users::getPassword, md5pwd);
+            } else {
+                wrapper.lambda().select(Users::getUsername, Users::getUserMobile, Users::getPassword, Users::getUserId).eq(Users::getUserMobile, userAccount)
+                        .eq(Users::getPassword, md5pwd);
+            }
 
             Users user = usersMapper.selectOne(wrapper);
 
@@ -84,9 +90,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
             }
 
             if (md5pwd.equals(user.getPassword())) {
-
-                return new TokenVo("用户登录成功", StatusVo.success, user, createToken(userName, user));
-
+                return new TokenVo("用户登录成功", StatusVo.success, user, createToken(userAccount, user));
             } else {
                 return new TokenVo("用户登录失败:密码错误", StatusVo.success, user, null);
             }
@@ -160,16 +164,13 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     private String createToken(String userName, Users users) {
         JwtBuilder builder = new DefaultJwtBuilder();
-
         Map<String, Object> map = new HashMap<>();
-
         map.put("Username", userName);
-
-        return builder.setSubject(userName) //token中携带的数据 支持链式调用
+        return builder.setSubject(userName) //token中携带的数据 支持链式调用  token 主题
                 .setIssuedAt(new Date()) //设置token的⽣成时间
                 .setId(users.getUserId() + "") //设置⽤户id为 token id
                 .setClaims(map) //map中可以存 放⽤户的⻆⾊权限信息
-                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) //设置过期时间
+                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) //设置过期时间  ==1 天
                 .signWith(SignatureAlgorithm.HS256, "Linson_H") //设置加密⽅式和 加密的密钥
                 .compact();//返回字符串
 
@@ -208,7 +209,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
                     int checkmate = userChenck.getExpirationTime().compareTo(new Date());
                     if (checkmate > 0) {
-                        return new ResultVo("请等待1分钟后再试", StatusVo.Error, null);
+                        return new ResultVo("请耐心等等60S后再试", StatusVo.Error, null);
                     }
                 }
 

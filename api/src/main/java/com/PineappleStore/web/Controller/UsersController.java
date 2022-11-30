@@ -31,8 +31,8 @@ public class UsersController {
 
     @ApiOperation(value = "登录接口", notes = "登录接口")
     @PostMapping("/login")
-    public TokenVo login(@RequestParam("userName") String userName, @RequestParam("passWord") String passWord, @RequestParam("loginToken") String loginToken) throws Exception {
-        return usersService.Login(userName, passWord, loginToken);
+    public TokenVo login(@RequestParam("userName") String userName, @RequestParam("passWord") String passWord, @RequestParam("loginToken") String loginToken, int loginType) throws Exception {
+        return usersService.Login(userName, passWord, loginToken, loginType);
     }
 
     @ApiOperation(value = "注册接口", notes = "注册接口")

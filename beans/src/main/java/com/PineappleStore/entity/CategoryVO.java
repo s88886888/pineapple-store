@@ -63,6 +63,11 @@ public class CategoryVO {
      */
     private int categoryStar;
 
+    /**
+     * 分类广告图片
+     */
+    private int categoryImg;
+
 
     private List<ProductListVo> productList;
 

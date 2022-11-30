@@ -71,7 +71,12 @@ public class Category implements Serializable {
     /**
      * 推荐商品
      */
-    private int CategoryStar;
+    private int categoryStar;
+
+    /**
+     * 分类广告图片
+     */
+    private int categoryImg;
 
 
 }

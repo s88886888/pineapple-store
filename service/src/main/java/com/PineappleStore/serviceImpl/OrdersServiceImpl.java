@@ -80,7 +80,6 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
         List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, mpjLambdaWrapper);
 
-
         return new ResultVo("查询成功", StatusVo.success, orders);
     }
 
@@ -238,23 +237,35 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
 
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
-        wrapper.lambda().select(Orders::getTotalAmount, Orders::getUntitled)
+        wrapper.lambda().select(Orders::getOrderId, Orders::getTotalAmount, Orders::getUntitled, Orders::getCreateTime)
                 .eq(Orders::getOrderId, orderId)
                 .eq(Orders::getStatus, "1");
 
         Orders orders = ordersMapper.selectOne(wrapper);
-
-        Date date = new Date();
-//        orders.getCreateTime()data.
-
         if (orders == null) {
-            return new ResultVo("该订单不存在", StatusVo.Error, orderId);
+            return new ResultVo("订单已被支付或者超过支付时间", StatusVo.Error, orderId);
         }
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(orders.getCreateTime()); //需要将date数据转移到Calender对象中操作
+        calendar.add(calendar.DATE, 1);//把日期往后增加n天.正数往后推,负数往前移动
+//         calendar.getTime();   //这个时间就是日期往后推一天的结果
+
+
+        //                1、如果指定的数与参数相等返回0。
+        //                2、如果指定的数小于参数返回 -1。
+        //                3、如果指定的数大于参数返回 1。
+        int i = calendar.getTime().compareTo(new Date());
+        if (i < 1) {
+            orders.setCloseType(1);
+            orders.setStatus("6");
+            orders.setUpdateTime(new Date());
+            ordersMapper.updateById(orders);
+            return new ResultVo("订单支付有效时间为24小时", StatusVo.Error, orderId);
+        }
         //BigDecimal 切割两位小数
         DecimalFormat df1 = new DecimalFormat("0.00");
         String totalAmount = df1.format(orders.getTotalAmount());
-
         try {
             // 2. 发起API调用 电脑收银台 二维码+账号登录
             AlipayTradePagePayResponse response = Factory.Payment.Page()

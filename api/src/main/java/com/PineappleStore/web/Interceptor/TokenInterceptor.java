@@ -29,7 +29,6 @@ public class TokenInterceptor implements HandlerInterceptor {
             ResultVo resultVO = new ResultVo("未检测到token，请先登录！", StatusVo.noToken, null);
             doResponse(response, resultVO);
         } else {
-            
             try {
                 JwtParser jwtParser = Jwts.parser();
                 //token 密钥 用于解析前端接受的token

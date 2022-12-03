@@ -58,6 +58,7 @@ public class ProductSku implements Serializable {
      */
     private Integer originalPrice;
 
+
     /**
      * 销售价格
      */
@@ -67,6 +68,7 @@ public class ProductSku implements Serializable {
      * 折扣力度
      */
     private BigDecimal discounts;
+
 
     /**
      * 库存

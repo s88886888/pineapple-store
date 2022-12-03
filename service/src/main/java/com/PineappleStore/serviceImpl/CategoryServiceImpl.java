@@ -153,4 +153,39 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
 
     }
+
+    @Override
+    public ResultVo SelectByParent() {
+
+        //复合查询先拿出 star==3 的id
+        QueryWrapper<Category> wrapper = new QueryWrapper<>();
+        wrapper.lambda().select(Category::getCategoryId).eq(Category::getCategoryStar, 3);
+        Category categoryId = categoryMapper.selectOne(wrapper);
+
+
+        if (categoryId == null) {
+            return new ResultVo("请求失败：管理员未设置商品信息", StatusVo.success, null);
+        }
+
+
+        MPJLambdaWrapper<Category> data = new MPJLambdaWrapper<Category>()
+                .selectAll(Category.class)
+                .selectCollection(Product.class, CategoryVO::getProductList, map -> map
+                        .collection(ProductImg.class, ProductListVo::getImgList)
+                        .collection(ProductSku.class, ProductListVo::getSkuList))
+
+                .leftJoin(Product.class, Product::getCategoryId, Category::getCategoryId)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+
+                .eq(ProductImg::getIsMain, 1)
+                .eq(Category::getParentId, categoryId.getCategoryId());
+
+        List<CategoryVO> category = categoryMapper.selectJoinList(CategoryVO.class, data);
+
+
+        return new ResultVo("请求成功", StatusVo.success, category);
+
+
+    }
 }

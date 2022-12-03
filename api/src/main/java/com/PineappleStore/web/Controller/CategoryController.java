@@ -77,8 +77,12 @@ public class CategoryController {
     public ResultVo SelectByCategoryStar(@PathVariable int Star) {
 
         return categoryService.SelectByCategoryStar(Star);
+    }
 
-
+    @GetMapping("/SelectByParent")
+    @ApiOperation(value = "根据字段SelectByParent进行查询", notes = "SelectByParent")
+    public ResultVo SelectByParent() {
+        return categoryService.SelectByParent();
     }
 
 

@@ -38,4 +38,7 @@ public interface CategoryService extends IService<Category> {
     boolean SelectByNameForBoolean(String Name);
 
 
+    ResultVo SelectByParent();
+
+
 }

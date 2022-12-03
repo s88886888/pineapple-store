@@ -153,6 +153,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
                 .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
                 .like(Product::getProductName, Name)
+                .eq(ProductImg::getIsMain, 1)
         );
 
         return new ResultVo("查询成功", StatusVo.success, ProductVo);
@@ -240,6 +241,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
                 .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
                 .eq(Product::getCategoryId, id)
+                .eq(ProductImg::getIsMain, 1)
         );
 
         return new ResultVo("查询成功", StatusVo.success, ProductVo);

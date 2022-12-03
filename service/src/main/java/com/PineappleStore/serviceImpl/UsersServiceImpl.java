@@ -116,12 +116,19 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
                 //检查验证码过期模块
                 LambdaQueryWrapper<UserChenck> wrapper = new LambdaQueryWrapper<>();
-                wrapper.select(UserChenck::getPhone, UserChenck::getCode, UserChenck::getCreateTime).orderByDesc(UserChenck::getCreateTime).eq(UserChenck::getPhone, phone).eq(UserChenck::getCode, phoneCode);
+                wrapper.select(UserChenck::getPhone, UserChenck::getCode, UserChenck::getCreateTime)
+                        .eq(UserChenck::getPhone, phone)
+                        .orderByDesc(UserChenck::getCreateTime)
+                        .last("LIMIT 1");
 
                 UserChenck userChenck = userChenckMapper.selectOne(wrapper);
 
+
                 if (userChenck == null) {
                     return new TokenVo("验证码错误", 4004, StatusVo.Error, null);
+                }
+                if (!userChenck.getCode().equals(phoneCode)) {
+                    return new TokenVo("验证码错误，请检查是否过期", 4004, StatusVo.Error, null);
                 } else {
 
                     Date date = userChenck.getCreateTime();

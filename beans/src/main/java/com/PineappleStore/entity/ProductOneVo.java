@@ -4,14 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductListVo {
+public class ProductOneVo {
 
 
     /**
@@ -59,32 +59,63 @@ public class ProductListVo {
      */
     private Date updateTime;
 
-//    /**
-//     * 原价
-//     */
-//    private Integer originalPrice;
-//
-//
-//    /**
-//     * 折扣
-//     */
-//    private BigDecimal discounts;
+
+    /**
+     * 图片主键
+     */
+    private String id;
+
+    /**
+     * 商品外键id 商品外键id
+     */
+    private String itemId;
+
+    /**
+     * 图片地址 图片地址
+     */
+    private String url;
+
+    /**
+     * 顺序 图片顺序，从小到大
+     */
+    private Integer sort;
+
+    /**
+     * 是否主图 是否主图，1：是，0：否
+     */
+    private Integer isMain;
+
+    /**
+     * 创建时间
+     */
+    private Date createdTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updatedTime;
 
 
-//    /**
-//     * skuID
-//     */
-//    private String skuId;
-//
-//    /**
-//     * sku名称
-//     */
-//    private String skuName;
+    /**
+     * 原价
+     */
+    private Integer originalPrice;
 
 
-    private List<ProductImg> imgList;
+    /**
+     * 折扣
+     */
+    private BigDecimal discounts;
 
-    private List<ProductSku> skuList;
 
+    /**
+     * skuID
+     */
+    private String skuId;
+
+    /**
+     * sku名称
+     */
+    private String skuName;
 
 }

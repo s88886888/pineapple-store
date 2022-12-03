@@ -54,6 +54,7 @@ public class UserCollectServiceImpl extends ServiceImpl<UserCollectMapper, UserC
                 .leftJoin(Product.class, Product::getProductId, UserCollect::getProductId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, UserCollect::getProductId)
                 .leftJoin(ProductSku.class, ProductSku::getProductId, UserCollect::getProductId)
+                .eq(ProductImg::getIsMain, 1)
                 .eq(UserCollect::getUserId, Id);
 
 

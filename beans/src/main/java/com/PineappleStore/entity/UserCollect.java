@@ -33,7 +33,7 @@ public class UserCollect implements Serializable {
     /**
      * 用户主键
      */
-    private String userId;
+    private Integer userId;
 
     /**
      * 商品分类主键

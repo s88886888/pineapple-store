@@ -48,7 +48,7 @@ public class ProductComments implements Serializable {
     /**
      * 评论用户id 用户名须脱敏
      */
-    private String userId;
+    private Integer userId;
 
     /**
      * 是否匿名（1:是，0:否）

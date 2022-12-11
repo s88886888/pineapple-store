@@ -16,16 +16,16 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface UsersService extends IService<Users> {
 
 
-     TokenVo Login(String userName, String passWord, String loginToken, int loginType) throws Exception;
+    TokenVo Login(String userName, String passWord, String loginToken, int loginType) throws Exception;
 
 
-     TokenVo resgit(String userName, String phone, String passWord, String phonecode);
+    TokenVo resgit(String userName, String phone, String passWord, String phonecode);
 
-     ResultVo getPhoneCode(String phone, String resgitToken) throws Exception;
+    ResultVo getPhoneCode(String phone, String resgitToken) throws Exception;
 
-     boolean CheckUserByName(String userName);
+    boolean CheckUserByName(String userName);
 
-     boolean CheckUserByPhone(String Phone);
+    boolean CheckUserByPhone(String Phone);
 
 
 }

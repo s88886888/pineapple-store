@@ -3,6 +3,7 @@ package com.PineappleStore.serviceImpl;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
+import com.PineappleStore.WebSocket.PayWebSocket;
 import com.PineappleStore.dao.OrderItemMapper;
 import com.PineappleStore.dao.OrdersMapper;
 import com.PineappleStore.dao.ProductMapper;
@@ -79,11 +80,24 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
     @Override
+    public ResultVo SelectOrederItem(String Id) {
+
+        MPJLambdaWrapper<Orders> wrapper = new MPJLambdaWrapper<Orders>()
+                .selectAll(Orders.class)
+                .selectCollection(OrderItem.class, OrdersVo::getProductList)
+                .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
+                .eq(Orders::getOrderId, Id);
+
+        List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, wrapper);
+
+
+        return new ResultVo("查询成功", StatusVo.success, orders);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public ResultVo AddModel(OrdersVo ordersVo) {
-
         try {
-
             /*订单表*/
             UUID uuid = UUID.randomUUID();
             ordersVo.setOrderId(String.valueOf(uuid));
@@ -189,7 +203,6 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
     /**
      * 生成订单号
-     *
      */
     protected String doOrderNum() {
         Random random = new Random();
@@ -251,6 +264,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         }
 
         Calendar calendar = Calendar.getInstance();
+
         calendar.setTime(orders.getCreateTime()); //需要将date数据转移到Calender对象中操作
         calendar.add(Calendar.DATE, 1);//把日期往后增加n天.正数往后推,负数往前移动
 //         calendar.getTime();   //这个时间就是日期往后推一天的结果
@@ -327,7 +341,11 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 orders.setUpdateTime(new Date());
                 orders.setPayType(2);
                 ordersMapper.updateById(orders);
+
+                PayWebSocket.sendPay(params.get("out_trade_no"), "支付成功");
             }
+
+
 //            return "success";
             return new ResultVo("支付成功", StatusVo.success, null);
         }

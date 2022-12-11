@@ -14,13 +14,14 @@
         <result column="discounts" property="discounts"/>
         <result column="stock" property="stock"/>
         <result column="create_time" property="createTime"/>
-        <result column="update_time" property="updateTime" />
-        <result column="status" property="status" />
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        sku_id, product_id, sku_name, sku_img, untitled, original_price, sell_price, discounts, stock, create_time, update_time, status
+        sku_id
+        , product_id, sku_name, sku_img, untitled, original_price, sell_price, discounts, stock, create_time, update_time, status
     </sql>
 
 </mapper>

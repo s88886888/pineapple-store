@@ -34,8 +34,6 @@ public class CategoryController {
         return categoryService.SelectByAll();
 
 
-
-
     }
 
     @GetMapping("/getId/{id}")

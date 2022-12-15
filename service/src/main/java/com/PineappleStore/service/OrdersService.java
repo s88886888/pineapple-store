@@ -38,5 +38,7 @@ public interface OrdersService extends MPJBaseService<Orders> {
 
     ResultVo aliPayNotify(HttpServletRequest request) throws Exception;
 
+    void ChenckTimeoutOrder();
+
 
 }

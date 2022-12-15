@@ -14,6 +14,7 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
 @EnableOpenApi
 @EnableTransactionManagement
 @EnableScheduling
+
 public class ApiApplication {
 
     public static void main(String[] args) {

@@ -13,10 +13,12 @@ import com.PineappleStore.service.OrdersService;
 import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.util.ResponseChecker;
 import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -351,6 +353,34 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         }
 //        return "failed";
         return new ResultVo("支付失败", StatusVo.Error, null);
+    }
+
+    @Scheduled(cron = "0/5 * * * * ?")
+    @Override
+    public void ChenckTimeoutOrder() {
+
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<Orders>()
+                .eq(Orders::getStatus, "1");
+
+        List<Orders> orders = ordersMapper.selectList(wrapper);
+
+
+        Calendar calendar = Calendar.getInstance();
+
+
+        for (Orders order : orders) {
+
+
+            calendar.setTime(order.getCreateTime()); //需要将date数据转移到Calender对象中操作
+            calendar.add(Calendar.DATE, 1);//把日期往后增加n天.正数往后推,负数往前移动
+            int timeNum = calendar.getTime().compareTo(new Date());
+            if (timeNum < 1) {
+                order.setStatus("6");
+                order.setCloseType(1);
+                ordersMapper.updateById(order);
+            }
+        }
+
     }
 
 

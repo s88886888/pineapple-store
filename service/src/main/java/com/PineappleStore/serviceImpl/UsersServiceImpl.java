@@ -111,7 +111,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
             boolean checker = CheckUserByName(userName);
             boolean chenckphone = CheckUserByPhone(phone);
-            if (checker || chenckphone) {
+            if (checker && chenckphone) {
 
 
                 //检查验证码过期模块

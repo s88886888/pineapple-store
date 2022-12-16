@@ -3,6 +3,7 @@ package com.PineappleStore.serviceImpl;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
+import com.PineappleStore.WebSocket.PayWebSocket;
 import com.PineappleStore.dao.OrderItemMapper;
 import com.PineappleStore.dao.OrdersMapper;
 import com.PineappleStore.dao.ProductMapper;
@@ -12,10 +13,12 @@ import com.PineappleStore.service.OrdersService;
 import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.util.ResponseChecker;
 import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,14 +71,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     public ResultVo SelectByUserId(String Id) {
 
 
-        MPJLambdaWrapper<Orders> mpjLambdaWrapper = new MPJLambdaWrapper<Orders>()
-                .selectAll(Orders.class)
+        MPJLambdaWrapper<Orders> mpjLambdaWrapper = new MPJLambdaWrapper<Orders>().selectAll(Orders.class)
                 //嵌套查询
-                .selectCollection(OrderItem.class, OrdersVo::getProductList)
-                .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
-                .leftJoin(ProductImg.class, ProductImg::getItemId, OrderItem::getProductId)
-                .eq(Orders::getUserId, Id)
-                .orderByDesc(Orders::getCreateTime);
+                .selectCollection(OrderItem.class, OrdersVo::getProductList).leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId).leftJoin(ProductImg.class, ProductImg::getItemId, OrderItem::getProductId).eq(Orders::getUserId, Id).orderByDesc(Orders::getCreateTime);
 
 
         List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, mpjLambdaWrapper);
@@ -84,106 +82,129 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
     @Override
-    @Transactional
+    public ResultVo SelectOrederItem(String Id) {
+
+        MPJLambdaWrapper<Orders> wrapper = new MPJLambdaWrapper<Orders>()
+                .selectAll(Orders.class)
+                .selectCollection(OrderItem.class, OrdersVo::getProductList)
+                .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
+                .eq(Orders::getOrderId, Id);
+
+        List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, wrapper);
+
+
+        return new ResultVo("查询成功", StatusVo.success, orders);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public ResultVo AddModel(OrdersVo ordersVo) {
-
-        /*订单表*/
-
-        UUID uuid = UUID.randomUUID();
-        ordersVo.setOrderId(String.valueOf(uuid));
-
-        Orders orders = new Orders();
-        orders.setOrderId(ordersVo.getOrderId());
-        orders.setUserId(ordersVo.getUserId());
-        orders.setReceiverAddress(ordersVo.getReceiverAddress());
-        orders.setReceiverName(ordersVo.getReceiverName());
-        orders.setReceiverMobile(ordersVo.getReceiverMobile());
-//        orders.setTotalAmount(ordersVo.getTotalAmount());
-        orders.setCreateTime(new Date());
-        orders.setUpdateTime(new Date());
+        try {
+            /*订单表*/
+            UUID uuid = UUID.randomUUID();
+            ordersVo.setOrderId(String.valueOf(uuid));
+            Orders orders = new Orders();
+            orders.setOrderId(ordersVo.getOrderId());
+            orders.setUserId(ordersVo.getUserId());
+            orders.setReceiverAddress(ordersVo.getReceiverAddress());
+            orders.setReceiverName(ordersVo.getReceiverName());
+            orders.setReceiverMobile(ordersVo.getReceiverMobile());
+            orders.setCreateTime(new Date());
+            orders.setUpdateTime(new Date());
 
 
+            //订单商品的总价 结算价格
+            BigDecimal TotalAmount = new BigDecimal("0");
 
+            //添加的订单详细表
+            List<OrderItem> orderItemList = new ArrayList<>();
 
-        /*  订单快照表*/
+            // 需要删除的用户购物车商品
+            List<String> shopIdList = new ArrayList<>();
 
-        //选中的商品 的总价
-        BigDecimal TotalAmount = new BigDecimal("0");
+            /*  订单快照表*/
+            for (int i = 0; i < ordersVo.getProductList().size(); i++) {
 
-        for (int i = 0; i < ordersVo.getProductList().size(); i++) {
+                //初始化数据
+                OrderItem orderItem = new OrderItem();
+                //只需要前端给我们的数量和商品ID，根据这些安全信息数据库自己查询，防止第三方修改
+                orderItem.setItemId(doOrderNum());
+                orderItem.setProductId(ordersVo.getProductList().get(i).getProductId());
 
-            OrderItem orderItem = new OrderItem();
+                //外键绑定订单表的ID
+                orderItem.setOrderId(ordersVo.getOrderId());
 
-            orderItem.setItemId(doOrderNum());
-            orderItem.setOrderId(ordersVo.getOrderId());
+                MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>().select(Product::getProductName).select(ProductImg::getUrl).select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId, ProductSku::getSkuName).leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductImg::getIsMain, "1").eq(Product::getProductId, ordersVo.getProductList().get(i).getProductId());
 
-            orderItem.setProductId(ordersVo.getProductList().get(i).getProductId());
+                ProductVo selectJoinOne = productMapper.selectJoinOne(ProductVo.class, wrapper);
 
+                orderItem.setProductName(selectJoinOne.getProductName());
+                orderItem.setProductImg(selectJoinOne.getUrl());
 
-            MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
-                    .select(Product::getProductName)
-                    .select(ProductImg::getUrl)
-                    .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId, ProductSku::getSkuName)
-                    .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
-                    .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
-                    .eq(ProductImg::getIsMain, "1")
-                    .eq(Product::getProductId, ordersVo.getProductList().get(i).getProductId());
-            ProductVo selectJoinOne = productMapper.selectJoinOne(ProductVo.class, wrapper);
-
-
-            orderItem.setProductName(selectJoinOne.getProductName());
-            orderItem.setProductImg(selectJoinOne.getUrl());
-
-
-            //库存待完善
-            orderItem.setSkuId(selectJoinOne.getSkuId());
+                //库存待完善
+                orderItem.setSkuId(selectJoinOne.getSkuId());
 //            orderItem.setSkuName(ordersVo.getProduct().get(i).getSkuName());
-            orderItem.setSkuName("测试");
+                orderItem.setSkuName("测试");
 
 
-            //商品价格
-            orderItem.setProductPrice(selectJoinOne.getDiscounts().multiply(BigDecimal.valueOf(selectJoinOne.getOriginalPrice())));
-            //商品数量
-            orderItem.setBuyCounts(ordersVo.getProductList().get(i).getCartNum());
+                //商品价格
+                orderItem.setProductPrice(selectJoinOne.getDiscounts().multiply(BigDecimal.valueOf(selectJoinOne.getOriginalPrice())));
+                //商品数量
+                orderItem.setBuyCounts(ordersVo.getProductList().get(i).getCartNum());
+                //商品总价
+                orderItem.setTotalAmount(orderItem.getProductPrice().multiply(BigDecimal.valueOf(orderItem.getBuyCounts())));
+                //订单时间
+                orderItem.setBuyTime(new Date());
 
-            //商品总价
-            orderItem.setTotalAmount(orderItem.getProductPrice().multiply(BigDecimal.valueOf(orderItem.getBuyCounts())));
+                //订单信息
+                //订单总价格
+                TotalAmount = TotalAmount.add(orderItem.getTotalAmount());
+
+                //订单商品总名字
+                orders.setUntitled(orders.getUntitled() == null ? orderItem.getProductName() + " * " + orderItem.getBuyCounts() + "|" : orders.getUntitled() + orderItem.getProductName() + " * " + orderItem.getBuyCounts() + "|");
+
+                //订单详细表增加
+                orderItemList.add(orderItem);
+
+                //删掉购物车
+                shopIdList.add(ordersVo.getProductList().get(i).getCartId());
 
 
-            TotalAmount = TotalAmount.add(orderItem.getTotalAmount());
-
-            orderItem.setBuyTime(new Date());
-
-
-            //订单总价
-
-
-            int isok = orderItemMapper.insert(orderItem);
-            int deleter = shoppingCartMapper.deleteById(ordersVo.getProductList().get(i).getCartId());
-
-            if (isok < 1 || deleter < 1) {
-                throw new RuntimeException("参数错误,事物回滚");
             }
-        }
-        orders.setTotalAmount(TotalAmount);
-        orders.setUntitled("测试ing" + TotalAmount);
-        orders.setStatus("1");
-        int in = ordersMapper.insert(orders);
+            orders.setTotalAmount(TotalAmount);
+            orders.setStatus("1");
+            int in = ordersMapper.insert(orders);
 
-        if (in > 0) {
-            return new ResultVo("清单确认成功：请支付", StatusVo.success, orders);
-        } else {
+            if (in > 0) {
 
-            throw new RuntimeException("参数错误,事物回滚");
-//            return new ResultVo("结算失败：请检查库存", StatusVo.Error, null);
+                for (OrderItem orderItem : orderItemList) {
+
+                    int isok = orderItemMapper.insert(orderItem);
+
+                    if (isok < 1) {
+                        return new ResultVo("结算失败：请检查库存", StatusVo.Error, null);
+                    }
+                }
+
+                for (String id : shopIdList) {
+                    int deleter = shoppingCartMapper.deleteById(id);
+                    if (deleter < 1) {
+                        return new ResultVo("结算失败：请刷新购物车", StatusVo.Error, null);
+                    }
+                }
+
+                return new ResultVo("清单确认成功：请支付", StatusVo.success, orders);
+            } else {
+                return new ResultVo("结算失败：请检查库存", StatusVo.Error, null);
+            }
+        } catch (Exception e) {
+            return new ResultVo("结算遭遇异常，请不要担心系统已启用回滚,不会影响您的数据有任何影响。如有问题请联系管理员！", StatusVo.Error, null);
         }
     }
 
 
     /**
      * 生成订单号
-     *
-     * @return
      */
     protected String doOrderNum() {
         Random random = new Random();
@@ -237,9 +258,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
 
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
-        wrapper.lambda().select(Orders::getOrderId, Orders::getTotalAmount, Orders::getUntitled, Orders::getCreateTime)
-                .eq(Orders::getOrderId, orderId)
-                .eq(Orders::getStatus, "1");
+        wrapper.lambda().select(Orders::getOrderId, Orders::getTotalAmount, Orders::getUntitled, Orders::getCreateTime).eq(Orders::getOrderId, orderId).eq(Orders::getStatus, "1");
 
         Orders orders = ordersMapper.selectOne(wrapper);
         if (orders == null) {
@@ -247,8 +266,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         }
 
         Calendar calendar = Calendar.getInstance();
+
         calendar.setTime(orders.getCreateTime()); //需要将date数据转移到Calender对象中操作
-        calendar.add(calendar.DATE, 1);//把日期往后增加n天.正数往后推,负数往前移动
+        calendar.add(Calendar.DATE, 1);//把日期往后增加n天.正数往后推,负数往前移动
 //         calendar.getTime();   //这个时间就是日期往后推一天的结果
 
 
@@ -270,8 +290,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
             // 2. 发起API调用 电脑收银台 二维码+账号登录
             AlipayTradePagePayResponse response = Factory.Payment.Page()
                     //设置15分钟未支付，则此次支付失败，因为订单过期了
-                    .optional("timeout_express", "15m")
-                    .pay(orders.getUntitled(), orderId, totalAmount, "");
+                    .optional("timeout_express", "15m").pay(orders.getUntitled(), orderId, totalAmount, "");
 
             //当面付款 只生成二维码
 //            AlipayTradePrecreateResponse response = Payment.FaceToFace()
@@ -324,12 +343,44 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 orders.setUpdateTime(new Date());
                 orders.setPayType(2);
                 ordersMapper.updateById(orders);
+
+                PayWebSocket.sendPay(params.get("out_trade_no"), "支付成功");
             }
+
+
 //            return "success";
             return new ResultVo("支付成功", StatusVo.success, null);
         }
 //        return "failed";
         return new ResultVo("支付失败", StatusVo.Error, null);
+    }
+
+    @Scheduled(cron = "0/5 * * * * ?")
+    @Override
+    public void ChenckTimeoutOrder() {
+
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<Orders>()
+                .eq(Orders::getStatus, "1");
+
+        List<Orders> orders = ordersMapper.selectList(wrapper);
+
+
+        Calendar calendar = Calendar.getInstance();
+
+
+        for (Orders order : orders) {
+
+
+            calendar.setTime(order.getCreateTime()); //需要将date数据转移到Calender对象中操作
+            calendar.add(Calendar.DATE, 1);//把日期往后增加n天.正数往后推,负数往前移动
+            int timeNum = calendar.getTime().compareTo(new Date());
+            if (timeNum < 1) {
+                order.setStatus("6");
+                order.setCloseType(1);
+                ordersMapper.updateById(order);
+            }
+        }
+
     }
 
 

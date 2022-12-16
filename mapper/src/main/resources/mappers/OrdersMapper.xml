@@ -14,10 +14,10 @@
         <result column="actual_amount" property="actualAmount"/>
         <result column="pay_type" property="payType"/>
         <result column="order_remark" property="orderRemark"/>
-        <result column="status" property="status" />
-        <result column="delivery_type" property="deliveryType" />
-        <result column="delivery_flow_id" property="deliveryFlowId" />
-        <result column="order_freight" property="orderFreight" />
+        <result column="status" property="status"/>
+        <result column="delivery_type" property="deliveryType"/>
+        <result column="delivery_flow_id" property="deliveryFlowId"/>
+        <result column="order_freight" property="orderFreight"/>
         <result column="delete_status" property="deleteStatus"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>

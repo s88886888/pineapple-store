@@ -21,6 +21,7 @@ public interface UserAddrService extends IService<UserAddr> {
 
     ResultVo SelectByUserId(String Id);
 
+
     ResultVo UpdateByModel(UserAddr UserAddr);
 
     ResultVo DeleteById(String Id);

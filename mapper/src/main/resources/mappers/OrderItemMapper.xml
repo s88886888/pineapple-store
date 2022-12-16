@@ -14,14 +14,15 @@
         <result column="product_price" property="productPrice"/>
         <result column="buy_counts" property="buyCounts"/>
         <result column="total_amount" property="totalAmount"/>
-        <result column="basket_date" property="basketDate" />
-        <result column="buy_time" property="buyTime" />
-        <result column="is_comment" property="isComment" />
+        <result column="basket_date" property="basketDate"/>
+        <result column="buy_time" property="buyTime"/>
+        <result column="is_comment" property="isComment"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        item_id, order_id, product_id, product_name, product_img, sku_id, sku_name, product_price, buy_counts, total_amount, basket_date, buy_time, is_comment
+        item_id
+        , order_id, product_id, product_name, product_img, sku_id, sku_name, product_price, buy_counts, total_amount, basket_date, buy_time, is_comment
     </sql>
 
 </mapper>

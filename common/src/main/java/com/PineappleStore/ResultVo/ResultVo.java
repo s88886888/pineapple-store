@@ -17,7 +17,6 @@ public class ResultVo {
     private Object Data;
 
 
-
 }
 
 

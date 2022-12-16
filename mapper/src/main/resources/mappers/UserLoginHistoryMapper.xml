@@ -14,7 +14,8 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        ID, AREA, COUNTRY, USER_ID, IP, LOGIN_TIME
+        ID
+        , AREA, COUNTRY, USER_ID, IP, LOGIN_TIME
     </sql>
 
 </mapper>

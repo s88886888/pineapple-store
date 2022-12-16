@@ -46,7 +46,7 @@ public class UserLoginHistory implements Serializable {
      * 用户id
      */
     @TableField("USER_ID")
-    private String userId;
+    private Integer userId;
 
     /**
      * IP

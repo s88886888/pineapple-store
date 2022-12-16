@@ -24,7 +24,6 @@ public class TokenInterceptor implements HandlerInterceptor {
         String token = request.getHeader("token");
 
 
-
         if (token == null) {
             ResultVo resultVO = new ResultVo("未检测到token，请先登录！", StatusVo.noToken, null);
             doResponse(response, resultVO);

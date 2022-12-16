@@ -36,7 +36,7 @@ public class Orders implements Serializable {
     /**
      * 用户ID
      */
-    private String userId;
+    private Integer userId;
 
     /**
      * 产品名称（多个产品用,隔开）

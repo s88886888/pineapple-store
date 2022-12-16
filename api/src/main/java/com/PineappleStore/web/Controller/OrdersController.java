@@ -48,6 +48,13 @@ public class OrdersController {
         return ordersService.SelectByUserId(id);
     }
 
+
+    @GetMapping("/getOrderitem/{id}")
+    @ApiOperation(value = "根据ID嵌套查询item", notes = "根据ID嵌套查询item")
+    public ResultVo SelectOrederItem(@PathVariable String id) {
+        return ordersService.SelectOrederItem(id);
+    }
+
     @PutMapping("/")
     @ApiOperation(value = "更新数据", notes = "提交model进行更新")
     public ResultVo UpdateByModel(@RequestBody Orders orders) {
@@ -72,6 +79,7 @@ public class OrdersController {
     public ResultVo OrderPay(@RequestParam String orderId) {
         return ordersService.aliPay(orderId);
     }
+
 
     @ApiOperation(value = "接受支付宝推送的内容", notes = "null")
     @PostMapping("/notify")

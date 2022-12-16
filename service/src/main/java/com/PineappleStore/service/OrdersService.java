@@ -24,6 +24,8 @@ public interface OrdersService extends MPJBaseService<Orders> {
 
     ResultVo SelectByUserId(String Id);
 
+    ResultVo SelectOrederItem(String Id);
+
     ResultVo UpdateByModel(Orders orders);
 
     ResultVo DeleteById(String Id);
@@ -35,6 +37,8 @@ public interface OrdersService extends MPJBaseService<Orders> {
     ResultVo aliPay(String orderId);
 
     ResultVo aliPayNotify(HttpServletRequest request) throws Exception;
+
+    void ChenckTimeoutOrder();
 
 
 }

@@ -2,6 +2,7 @@ package com.PineappleStore.serviceImpl;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
+import com.PineappleStore.dao.OrdersMapper;
 import com.PineappleStore.dao.UserAddrMapper;
 import com.PineappleStore.entity.UserAddr;
 import com.PineappleStore.service.UserAddrService;
@@ -28,6 +29,9 @@ public class UserAddrServiceImpl extends ServiceImpl<UserAddrMapper, UserAddr> i
 
     @Autowired
     private UserAddrMapper userAddrMapper;
+
+    @Autowired
+    private OrdersMapper ordersMapper;
 
 
     @Override

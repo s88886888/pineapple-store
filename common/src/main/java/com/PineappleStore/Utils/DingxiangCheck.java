@@ -9,17 +9,6 @@ import org.springframework.stereotype.Component;
 public class DingxiangCheck {
 
 
-    @Bean
-    public void getDingXiangCheck() throws Exception {
-
-        if (Checktoken("1234567890000000000000000000Linson")) {
-            System.out.println("---------------------------顶象验证环境配置失败请检查服务是否过期---------------------------");
-        } else {
-            System.out.println("---------------------------顶象验证环境配置成功---------------------------");
-        }
-    }
-
-
     public static boolean Checktoken(String token) throws Exception {
         /**构造入参为appId和appSecret
          * appId和前端验证码的appId保持一致，appId可公开
@@ -51,6 +40,16 @@ public class DingxiangCheck {
         } else {
             /**token验证失败，业务系统可以直接阻断该次请求或者继续弹验证码**/
             return false;
+        }
+    }
+
+    @Bean
+    public void getDingXiangCheck() throws Exception {
+
+        if (Checktoken("1234567890000000000000000000Linson")) {
+            System.out.println("---------------------------顶象验证环境配置失败请检查服务是否过期---------------------------");
+        } else {
+            System.out.println("---------------------------顶象验证环境配置成功---------------------------");
         }
     }
 

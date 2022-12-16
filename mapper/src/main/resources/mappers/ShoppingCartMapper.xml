@@ -16,7 +16,8 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        cart_id, product_id, sku_id, user_id, cart_num, cart_time, product_price, sku_props
+        cart_id
+        , product_id, sku_id, user_id, cart_num, cart_time, product_price, sku_props
     </sql>
 
 </mapper>

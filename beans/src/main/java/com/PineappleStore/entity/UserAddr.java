@@ -35,7 +35,7 @@ public class UserAddr implements Serializable {
     /**
      * 用户ID
      */
-    private String userId;
+    private Integer userId;
 
     /**
      * 收件人姓名

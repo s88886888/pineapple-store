@@ -30,7 +30,7 @@ public class ShoppingCartVo {
     /**
      * 用户ID
      */
-    private String userId;
+    private Integer userId;
 
     /**
      * 购物车商品数量

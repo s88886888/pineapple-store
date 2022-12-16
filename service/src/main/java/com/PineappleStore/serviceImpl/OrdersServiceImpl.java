@@ -355,7 +355,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         return new ResultVo("支付失败", StatusVo.Error, null);
     }
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0 0/15 * * * ?")
     @Override
     public void ChenckTimeoutOrder() {
 

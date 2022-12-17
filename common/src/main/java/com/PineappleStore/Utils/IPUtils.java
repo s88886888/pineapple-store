@@ -14,7 +14,7 @@ public class IPUtils {
     private static final String UNKNOWN = "unknown";
     private static final String LOCALHOST_IP = "0:0:0:0:0:0:0:1";
     private static final String LOCALHOST_IP1 = "127.0.0.1";
-    private static Logger logger = LoggerFactory.getLogger(IPUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(IPUtils.class);
 
     /**
      * 获取IP地址

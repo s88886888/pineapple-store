@@ -89,4 +89,6 @@ public class ShoppingCartVo {
     private boolean checkbox;
 
 
+    private String skuName;
+
 }

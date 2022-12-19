@@ -1,5 +1,6 @@
 package com.PineappleStore.service;
 
+import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.ProductSku;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,6 +13,17 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2022-10-17
  */
 public interface ProductSkuService extends IService<ProductSku> {
+
+
+    ResultVo SelectByAll();
+
+    ResultVo SelectById(String Id);
+
+    ResultVo UpdateByModel(ProductSku productSku);
+
+    ResultVo DeleteById(String Id);
+
+    ResultVo AddModel(ProductSku productSku);
 
 
 }

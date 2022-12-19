@@ -88,9 +88,11 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
                 .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
-                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1)
                 .eq(Category::getCategoryStar, star)
         );
+
+
         return new ResultVo("查询成功", StatusVo.success, product);
 
     }
@@ -237,7 +239,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         IPage<ProductVo> ProductVo = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, new MPJLambdaWrapper<Product>()
                 .selectAll(Product.class)
                 .selectAll(ProductImg.class)
-                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts).eq(ProductSku::getSkuStar, 1)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
                 .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
                 .eq(Product::getCategoryId, id)
@@ -248,12 +250,14 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
-    public ResultVo SelectByItemid(int Id) {
+    public ResultVo selectByItemid(int Id) {
         MPJLambdaWrapper<Product> mpjLambdaWrapper = new MPJLambdaWrapper<Product>()
                 .selectAll(Product.class)
-                .selectAll(ProductImg.class)
+                .selectCollection(ProductImg.class, ProductVo::getImgList)
+                .selectCollection(ProductSku.class, ProductVo::getSkuList)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
-                .eq(ProductImg::getItemId, Id);
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                .eq(Product::getProductId, Id);
 
         List<ProductVo> productVoList = ProductMapper.selectJoinList(ProductVo.class, mpjLambdaWrapper);
         return new ResultVo("查询成功", StatusVo.success, productVoList);

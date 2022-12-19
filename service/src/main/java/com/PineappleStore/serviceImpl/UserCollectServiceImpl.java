@@ -46,6 +46,7 @@ public class UserCollectServiceImpl extends ServiceImpl<UserCollectMapper, UserC
     @Override
     public ResultVo SelectByUserId(String Id) {
 
+
         MPJLambdaWrapper<UserCollect> wrapper = new MPJLambdaWrapper<UserCollect>()
                 .selectAll(UserCollect.class)
                 .select(Product::getProductName, Product::getContent)
@@ -53,7 +54,7 @@ public class UserCollectServiceImpl extends ServiceImpl<UserCollectMapper, UserC
                 .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
                 .leftJoin(Product.class, Product::getProductId, UserCollect::getProductId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, UserCollect::getProductId)
-                .leftJoin(ProductSku.class, ProductSku::getProductId, UserCollect::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getSkuId, UserCollect::getSkuId)
                 .eq(ProductImg::getIsMain, 1)
                 .eq(UserCollect::getUserId, Id);
 

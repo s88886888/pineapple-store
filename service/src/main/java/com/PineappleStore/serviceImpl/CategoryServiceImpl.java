@@ -57,7 +57,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 .selectAll(Category.class).eq(Category::getCategoryStar, Star)
                 .selectCollection(Product.class, CategoryVO::getProductList, map -> map.collection(ProductImg.class, ProductListVo::getImgList))
                 .leftJoin(Product.class, Product::getCategoryId, Category::getCategoryId)
-                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .eq(ProductImg::getIsMain, 1)
                 .orderByAsc(Category::getCategoryId);
 
 
@@ -162,11 +163,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         wrapper.lambda().select(Category::getCategoryId).eq(Category::getCategoryStar, 3);
         Category categoryId = categoryMapper.selectOne(wrapper);
 
-
         if (categoryId == null) {
             return new ResultVo("请求失败：管理员未设置商品信息", StatusVo.success, null);
         }
-
 
         MPJLambdaWrapper<Category> data = new MPJLambdaWrapper<Category>()
                 .selectAll(Category.class)

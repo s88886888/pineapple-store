@@ -51,7 +51,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         List<ShoppingCartVo> ShoppingCartVo = shoppingCartMapper.selectJoinList(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCart>()
                 .select(Product::getProductName, Product::getCategoryId)
                 .select(ProductImg::getUrl).eq(ProductImg::getIsMain, 1)
-                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuName)
                 .selectAll(ShoppingCart.class)
                 .leftJoin(Product.class, Product::getProductId, ShoppingCart::getProductId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, ShoppingCart::getProductId)
@@ -86,9 +86,11 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     public ResultVo AddModel(ShoppingCart shoppingCart) {
 
         QueryWrapper<ShoppingCart> wrapper = new QueryWrapper<>();
-        wrapper.lambda().select(ShoppingCart::getUserId, ShoppingCart::getProductId, ShoppingCart::getCartId, ShoppingCart::getCartNum)
+        wrapper.lambda()
+                .select(ShoppingCart::getUserId, ShoppingCart::getProductId, ShoppingCart::getCartId, ShoppingCart::getCartNum)
                 .eq(ShoppingCart::getUserId, shoppingCart.getUserId())
-                .eq(ShoppingCart::getProductId, shoppingCart.getProductId());
+                .eq(ShoppingCart::getProductId, shoppingCart.getProductId())
+                .eq(ShoppingCart::getSkuId, shoppingCart.getSkuId());
 
         ShoppingCart shoppingCartOne = shoppingCartMapper.selectOne(wrapper);
 
@@ -98,7 +100,11 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
             shoppingCart.setCartTime(shoppingCartOne.getCartTime());
 
             int cartNum = Integer.parseInt(shoppingCartOne.getCartNum());
-            shoppingCart.setCartNum(String.valueOf(cartNum++));
+
+            if (cartNum >= 10) {
+                return new ResultVo("增加失败:数量不能超过10！", 203, null);
+            }
+            shoppingCart.setCartNum(String.valueOf(cartNum + 1));
 
 
             return UpdateByModel(shoppingCart);
@@ -106,17 +112,23 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         } else {
 
             shoppingCart.setCartTime(String.valueOf(new Date()));
-//            shoppingCart.setCartNum(1);
-
             shoppingCart.setCartNum("1");
-
-
             int i = shoppingCartMapper.insert(shoppingCart);
 
+            MPJLambdaWrapper<ShoppingCart> queryWrapper = new MPJLambdaWrapper<ShoppingCart>()
+                    .selectAll(ShoppingCart.class)
+                    .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId, ProductSku::getSkuName)
+                    .select(ProductImg::getUrl)
+                    .select(Product::getProductName)
+                    .leftJoin(ProductSku.class, ProductSku::getSkuId, ShoppingCart::getSkuId)
+                    .leftJoin(ProductImg.class, ProductImg::getItemId, ShoppingCart::getProductId).eq(ProductImg::getIsMain, 1)
+                    .leftJoin(Product.class, Product::getProductId, ShoppingCart::getProductId)
+                    .eq(ShoppingCart::getCartId, shoppingCart.getCartId());
+            ShoppingCartVo data = shoppingCartMapper.selectJoinOne(ShoppingCartVo.class, queryWrapper);
+
+
             if (i > 0) {
-
-
-                return new ResultVo("添加购物车成功", StatusVo.success, SelectByIdForproduct(shoppingCart.getCartId()));
+                return new ResultVo("添加购物车成功", StatusVo.success, data);
 
             } else {
                 return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
@@ -151,11 +163,14 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     public ResultVo UpdateByModel(ShoppingCart shoppingCart) {
 
         if (SelectByIdForBoolean(shoppingCart.getCartId())) {
+
             shoppingCartMapper.updateById(shoppingCart);
+
             return new ResultVo("修改购物成功", StatusVo.created, shoppingCart);
         } else {
             return new ResultVo("更新失败，该数据不存在", StatusVo.Error, null);
         }
+
 
     }
 

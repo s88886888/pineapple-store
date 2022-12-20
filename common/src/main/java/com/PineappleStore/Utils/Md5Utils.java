@@ -17,7 +17,7 @@ public class Md5Utils {
         try {
             md5 = MessageDigest.getInstance("MD5");
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println(e);
             e.printStackTrace();
             return "";
         }
@@ -67,7 +67,7 @@ public class Md5Utils {
     @Bean
     public void checkmd5() {
 
-        String passWord = new String("Linson");
+        String passWord = "Linson";
 
         if (passWord.equals(convertMD5(convertMD5(passWord)))) {
             System.out.println("---------------------------MD5加密环境配置成功---------------------------");

@@ -48,17 +48,17 @@ public class UserCollectController {
         return UserCollectService.UpdateByModel(userCollect);
     }
 
-    @DeleteMapping("/{id}")
-    @ApiOperation(value = "根据一条id进行删除数据", notes = "传入单id")
-    public ResultVo DeleteById(@PathVariable int id) {
-        return UserCollectService.DeleteById(id);
+    @DeleteMapping("/{id}/{Skuid}/{userId}")
+    @ApiOperation(value = "根据一条id进行删除数据", notes = "传入id")
+    public ResultVo DeleteById(@PathVariable String id, @PathVariable String Skuid, @PathVariable int userId) {
+        return UserCollectService.DeleteById(id, Skuid, userId);
     }
 
-    @DeleteMapping("/{UserId}/{ProductId}")
-    @ApiOperation(value = "根据用户id和商品id进行删除数据", notes = "传入用户id和商品id")
-    public ResultVo DeleteByUserId(@PathVariable int UserId, @PathVariable String ProductId) {
-        return UserCollectService.DeleteByUserId(UserId, ProductId);
-    }
+//    @DeleteMapping("/{UserId}/{ProductId}")
+//    @ApiOperation(value = "根据用户id和商品id进行删除数据", notes = "传入用户id和商品id")
+//    public ResultVo DeleteByUserId(@PathVariable int UserId, @PathVariable String ProductId) {
+//        return UserCollectService.DeleteByUserId(UserId, ProductId);
+//    }
 
     @PostMapping("/")
     @ApiOperation(value = "增加一条数据", notes = "提交model进行增加数据")

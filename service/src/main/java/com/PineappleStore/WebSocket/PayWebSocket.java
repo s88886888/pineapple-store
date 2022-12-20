@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint("/pay/{id}")
 public class PayWebSocket {
 
-    private static ConcurrentHashMap<String, Session> sessionMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Session> sessionMap = new ConcurrentHashMap<>();
 
     public static void sendPay(String orderId, String Msg) {
 

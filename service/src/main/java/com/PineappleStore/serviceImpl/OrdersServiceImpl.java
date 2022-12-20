@@ -73,7 +73,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
         MPJLambdaWrapper<Orders> mpjLambdaWrapper = new MPJLambdaWrapper<Orders>().selectAll(Orders.class)
                 //嵌套查询
-                .selectCollection(OrderItem.class, OrdersVo::getProductList).leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId).leftJoin(ProductImg.class, ProductImg::getItemId, OrderItem::getProductId).eq(Orders::getUserId, Id).orderByDesc(Orders::getCreateTime);
+                .selectCollection(OrderItem.class, OrdersVo::getProductList)
+                .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, OrderItem::getProductId).eq(Orders::getUserId, Id).orderByDesc(Orders::getCreateTime);
 
 
         List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, mpjLambdaWrapper);
@@ -99,7 +101,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ResultVo AddModel(OrdersVo ordersVo) {
+
         try {
+
             /*订单表*/
             UUID uuid = UUID.randomUUID();
             ordersVo.setOrderId(String.valueOf(uuid));
@@ -134,7 +138,15 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 //外键绑定订单表的ID
                 orderItem.setOrderId(ordersVo.getOrderId());
 
-                MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>().select(Product::getProductName).select(ProductImg::getUrl).select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId, ProductSku::getSkuName).leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductImg::getIsMain, "1").eq(Product::getProductId, ordersVo.getProductList().get(i).getProductId());
+                MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
+                        .select(Product::getProductName)
+                        .select(ProductImg::getUrl)
+                        .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId, ProductSku::getSkuName)
+                        .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                        .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                        .eq(ProductImg::getIsMain, "1")
+                        .eq(ProductSku::getSkuId, ordersVo.getProductList().get(i).getSkuId())
+                        .eq(Product::getProductId, ordersVo.getProductList().get(i).getProductId());
 
                 ProductVo selectJoinOne = productMapper.selectJoinOne(ProductVo.class, wrapper);
 
@@ -143,8 +155,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
                 //库存待完善
                 orderItem.setSkuId(selectJoinOne.getSkuId());
-//            orderItem.setSkuName(ordersVo.getProduct().get(i).getSkuName());
-                orderItem.setSkuName("测试");
+                orderItem.setSkuName(selectJoinOne.getSkuName());
 
 
                 //商品价格
@@ -198,7 +209,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 return new ResultVo("结算失败：请检查库存", StatusVo.Error, null);
             }
         } catch (Exception e) {
-            return new ResultVo("结算遭遇异常，请不要担心系统已启用回滚,不会影响您的数据有任何影响。如有问题请联系管理员！", StatusVo.Error, null);
+            return new ResultVo("结算遭遇异常，请您不要担心系统已启用：数据回滚,不会对您的账号有任何影响。如有问题请联系管理员Linson！", StatusVo.Error, null);
         }
     }
 
@@ -355,7 +366,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         return new ResultVo("支付失败", StatusVo.Error, null);
     }
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0 0/15 * * * ?")
     @Override
     public void ChenckTimeoutOrder() {
 

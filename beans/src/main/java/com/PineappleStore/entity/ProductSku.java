@@ -92,5 +92,10 @@ public class ProductSku implements Serializable {
      */
     private Integer status;
 
+    /**
+     * 是否为推荐商品的 推荐价格（1启用）
+     */
+    private Integer skuStar;
+
 
 }

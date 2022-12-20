@@ -1,5 +1,6 @@
 package com.PineappleStore.serviceImpl;
 
+import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.dao.ProductSkuMapper;
 import com.PineappleStore.entity.ProductSku;
 import com.PineappleStore.service.ProductSkuService;
@@ -16,5 +17,31 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, ProductSku> implements ProductSkuService {
+
+    @Override
+    public ResultVo SelectByAll() {
+        return null;
+    }
+
+    @Override
+    public ResultVo SelectById(String Id) {
+        return null;
+    }
+
+    @Override
+    public ResultVo UpdateByModel(ProductSku productSku) {
+        return null;
+    }
+
+    @Override
+    public ResultVo DeleteById(String Id) {
+        return null;
+    }
+
+    @Override
+    public ResultVo AddModel(ProductSku productSku) {
+        return null;
+    }
+
 
 }

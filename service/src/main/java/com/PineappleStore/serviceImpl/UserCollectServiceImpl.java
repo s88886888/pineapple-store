@@ -6,6 +6,7 @@ import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.UserCollectMapper;
 import com.PineappleStore.entity.*;
 import com.PineappleStore.service.UserCollectService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
@@ -46,6 +47,7 @@ public class UserCollectServiceImpl extends ServiceImpl<UserCollectMapper, UserC
     @Override
     public ResultVo SelectByUserId(String Id) {
 
+
         MPJLambdaWrapper<UserCollect> wrapper = new MPJLambdaWrapper<UserCollect>()
                 .selectAll(UserCollect.class)
                 .select(Product::getProductName, Product::getContent)
@@ -53,8 +55,9 @@ public class UserCollectServiceImpl extends ServiceImpl<UserCollectMapper, UserC
                 .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
                 .leftJoin(Product.class, Product::getProductId, UserCollect::getProductId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, UserCollect::getProductId)
-                .leftJoin(ProductSku.class, ProductSku::getProductId, UserCollect::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getSkuId, UserCollect::getSkuId)
                 .eq(ProductImg::getIsMain, 1)
+
                 .eq(UserCollect::getUserId, Id);
 
 
@@ -70,7 +73,8 @@ public class UserCollectServiceImpl extends ServiceImpl<UserCollectMapper, UserC
         QueryWrapper<UserCollect> wrapper = new QueryWrapper<>();
         wrapper.lambda().select(UserCollect::getProductId)
                 .eq(UserCollect::getProductId, userCollect.getProductId())
-                .eq(UserCollect::getUserId, userCollect.getUserId());
+                .eq(UserCollect::getUserId, userCollect.getUserId())
+                .eq(UserCollect::getSkuId, userCollect.getSkuId());
         UserCollect Collect = userCollectMapper.selectOne(wrapper);
 
         if (Collect == null) {
@@ -89,12 +93,18 @@ public class UserCollectServiceImpl extends ServiceImpl<UserCollectMapper, UserC
 
 
     @Override
-    public ResultVo DeleteById(int Id) {
+    public ResultVo DeleteById(String productId, String skuId, int userId) {
 
-        ResultVo checkModel = SelectById(Id);
 
-        if (checkModel != null) {
-            int category = userCollectMapper.deleteById(Id);
+        LambdaQueryWrapper<UserCollect> Wrapper = new LambdaQueryWrapper<>();
+        Wrapper.eq(UserCollect::getProductId, productId);
+        Wrapper.eq(UserCollect::getSkuId, skuId);
+        Wrapper.eq(UserCollect::getUserId, userId);
+
+        UserCollect data = userCollectMapper.selectOne(Wrapper);
+
+        if (data != null) {
+            int category = userCollectMapper.deleteById(data.getCollectId());
             if (category > 0) {
                 return new ResultVo("删除成功", StatusVo.success, null);
             } else {

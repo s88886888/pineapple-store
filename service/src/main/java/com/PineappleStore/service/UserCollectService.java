@@ -24,7 +24,7 @@ public interface UserCollectService extends IService<UserCollect> {
 
     ResultVo UpdateByModel(UserCollect userCollect);
 
-    ResultVo DeleteById(int Id);
+    ResultVo DeleteById(String Id, String skuId, int userId);
 
     ResultVo DeleteByUserId(int UserId, String ProductId);
 

@@ -34,13 +34,9 @@ public class DingxiangCheck {
 //        System.out.println(response.getResult()+"--------------------------------------------------------2");
 //        System.out.println(response.getIp()+"--------------------------------------------------------3");
 
-        if (response.getResult()) {
-            /**token验证通过，继续其他流程**/
-            return true;
-        } else {
-            /**token验证失败，业务系统可以直接阻断该次请求或者继续弹验证码**/
-            return false;
-        }
+        /**token验证通过，继续其他流程**/
+        /**token验证失败，业务系统可以直接阻断该次请求或者继续弹验证码**/
+        return response.getResult();
     }
 
     @Bean

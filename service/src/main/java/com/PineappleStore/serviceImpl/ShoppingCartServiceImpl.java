@@ -114,8 +114,21 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
             shoppingCart.setCartTime(String.valueOf(new Date()));
             shoppingCart.setCartNum("1");
             int i = shoppingCartMapper.insert(shoppingCart);
+
+            MPJLambdaWrapper<ShoppingCart> queryWrapper = new MPJLambdaWrapper<ShoppingCart>()
+                    .selectAll(ShoppingCart.class)
+                    .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId, ProductSku::getSkuName)
+                    .select(ProductImg::getUrl)
+                    .select(Product::getProductName)
+                    .leftJoin(ProductSku.class, ProductSku::getSkuId, ShoppingCart::getSkuId)
+                    .leftJoin(ProductImg.class, ProductImg::getItemId, ShoppingCart::getProductId).eq(ProductImg::getIsMain, 1)
+                    .leftJoin(Product.class, Product::getProductId, ShoppingCart::getProductId)
+                    .eq(ShoppingCart::getCartId, shoppingCart.getCartId());
+            ShoppingCartVo data = shoppingCartMapper.selectJoinOne(ShoppingCartVo.class, queryWrapper);
+
+
             if (i > 0) {
-                return new ResultVo("添加购物车成功", StatusVo.success, SelectByIdForproduct(shoppingCart.getCartId()));
+                return new ResultVo("添加购物车成功", StatusVo.success, data);
 
             } else {
                 return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);

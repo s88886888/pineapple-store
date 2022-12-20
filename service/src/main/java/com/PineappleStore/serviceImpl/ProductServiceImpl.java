@@ -73,7 +73,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .selectAll(ProductImg.class)
                 .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
-                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId));
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1));
 
         return new ResultVo("查询成功", StatusVo.success, ProductVo);
     }
@@ -156,6 +156,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
                 .like(Product::getProductName, Name)
                 .eq(ProductImg::getIsMain, 1)
+                .eq(ProductSku::getSkuStar, 1)
         );
 
         return new ResultVo("查询成功", StatusVo.success, ProductVo);

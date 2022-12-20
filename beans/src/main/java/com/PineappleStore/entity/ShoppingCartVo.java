@@ -88,7 +88,9 @@ public class ShoppingCartVo {
      */
     private boolean checkbox;
 
-
+    /**
+     * sku名称
+     */
     private String skuName;
 
 }

@@ -27,7 +27,7 @@ public class Client {
         this.timestamp = System.currentTimeMillis();
         this.signType = "md5";
         this.appId = "hw_10023";     //开发者ID，在【设置】-【开发设置】中获取
-        this.secretKey = "0a35e267a5ab0e665b9a407031d94d71";   //开发者密钥，在【设置】-【开发设置】中获取
+        this.secretKey = "b358388883044de5e647b6598d1697ab";   //开发者密钥，在【设置】-【开发设置】中获取
         this.version = "1.0";
 //        System.out.println("---------------------------闪速度码环境配置成功---------------------------");
     }
@@ -54,7 +54,7 @@ public class Client {
         this.timestamp = System.currentTimeMillis();
         this.signType = "md5";
         this.appId = "hw_10023";     //开发者ID，在【设置】-【开发设置】中获取
-        this.secretKey = "0a35e267a5ab0e665b9a407031d94d71";   //开发者密钥，在【设置】-【开发设置】中获取
+        this.secretKey = "b358388883044de5e647b6598d1697ab";   //开发者密钥，在【设置】-【开发设置】中获取
         this.version = "1.0";
         System.out.println("---------------------------闪速码环境配置成功---------------------------");
     }

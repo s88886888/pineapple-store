@@ -11,6 +11,7 @@ import com.PineappleStore.dao.UsersMapper;
 import com.PineappleStore.entity.UserChenck;
 import com.PineappleStore.entity.Users;
 import com.PineappleStore.service.UsersService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -128,17 +129,17 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                     return new TokenVo("验证码错误", 4004, StatusVo.Error, null);
                 }
                 if (!userChenck.getCode().equals(phoneCode)) {
-                    return new TokenVo("验证码错误，请检查是否过期", 4004, StatusVo.Error, null);
+                    return new TokenVo("验证码错误没,请检查", 4004, StatusVo.Error, null);
                 } else {
 
                     Date date = userChenck.getCreateTime();
                     //验证码创建时间加上5分钟便是 过期时间
                     Date afterDate = new Date(date.getTime() + 300000); //60000为1分钟  //300000为5分钟
 
-// 1、如果指定的数与参数相等返回0。
+//                 1、如果指定的数与参数相等返回0。
 //                2、如果指定的数小于参数返回 -1。
-//                3、如果指定的数大于参数返回 1。3
-//                  2020-10-10 11：15 < 2020-10-10 11：20  ===>  -1
+//               3、如果指定的数大于参数返回 1。
+//                2020-10-10 11：15 < 2020-10-10 11：20  ===>  -1
                     int checktime = afterDate.compareTo(new Date());
 
                     if (checktime < 0) {
@@ -239,7 +240,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 send.put("mobile", phoneList);
                 send.put("type", 0);
                 send.put("template_id", "ST_2020101100000005");
-                send.put("sign", "闪速码");
+                send.put("sign", "闪验");
                 send.put("send_time", "");
 
                 //发送随机的验证码
@@ -250,18 +251,33 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 request.setMethod("sms.message.send");
 
 
-                UserChenck model = new UserChenck();
-                model.setPhone(phone);
-                model.setCode(String.valueOf(phoneCode));
-                model.setCreateTime(new Date());
-                model.setExpirationTime(afterDate);
-                int i = userChenckMapper.insert(model);
-                if (i < 1) {
-                    return new ResultVo("系统错误，请稍后再试", StatusVo.wrong, null);
-                }
                 //发送验证码
-                client.execute(request);
-                return new ResultVo("验证码发送成功，验证码有效期5分钟", StatusVo.success, null);
+                JSONObject jsonObject = JSON.parseObject(client.execute(request));
+                //{"code":0,"message":"请求成功","data":{"code":10004,"message":"发送失败，短信签名错误"}}
+
+                Map map = (Map) jsonObject.get("data");
+                //{"code":10004,"message":"发送失败，短信签名错误"}
+
+
+                if (map.get("code").equals(0)) {
+
+                    UserChenck model = new UserChenck();
+                    model.setPhone(phone);
+                    model.setCode(String.valueOf(phoneCode));
+                    model.setCreateTime(new Date());
+                    model.setExpirationTime(afterDate);
+                    int i = userChenckMapper.insert(model);
+                    if (i < 1) {
+                        return new ResultVo("系统错误，请稍后再试", StatusVo.wrong, null);
+                    }
+
+                    return new ResultVo("验证码发送成功，验证码有效期5分钟", StatusVo.success, map.get("message"));
+
+                } else {
+                    return new ResultVo("发送手机验证码失败大概率是因为欠费，服务商返回：" + map.get("message"), StatusVo.Error, null);
+                }
+
+
             } else {
                 return new ResultVo("手机号码已经被注册", StatusVo.Error, null);
             }

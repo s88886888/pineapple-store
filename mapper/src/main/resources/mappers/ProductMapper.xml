@@ -17,8 +17,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        product_id
-        , product_name, category_id, root_category_id, sold_num, product_status, content, create_time, update_time
+        product_id, product_name, category_id, root_category_id, sold_num, product_status, content, create_time, update_time
     </sql>
 
 </mapper>

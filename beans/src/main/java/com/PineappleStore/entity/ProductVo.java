@@ -120,8 +120,14 @@ public class ProductVo {
     private String skuName;
 
 
+    private String categoryName;
+
+
     private List<ProductImg> imgList;
 
     private List<ProductSku> skuList;
+
+
+    private List<imgVo> images;
 
 }

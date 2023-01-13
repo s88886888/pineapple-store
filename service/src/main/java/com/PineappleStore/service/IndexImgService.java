@@ -17,9 +17,15 @@ public interface IndexImgService extends IService<IndexImg> {
 
     ResultVo SelectByAll();
 
+    ResultVo SelectByAllStatus();
+
     ResultVo SelectById(String Id);
 
+    ResultVo SelectByName(String Name);
+
     ResultVo UpdateByModel(IndexImg IndexImg);
+
+    ResultVo UpdateStatusById(String Id);
 
     ResultVo DeleteById(String Id);
 

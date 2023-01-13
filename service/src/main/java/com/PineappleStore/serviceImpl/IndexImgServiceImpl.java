@@ -5,6 +5,7 @@ import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.IndexImgMapper;
 import com.PineappleStore.entity.IndexImg;
 import com.PineappleStore.service.IndexImgService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * <p>
@@ -31,6 +33,14 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
     @Override
     public ResultVo SelectByAll() {
         QueryWrapper<IndexImg> wrapper = new QueryWrapper<>();
+        wrapper.lambda().eq(IndexImg::getStatus, 1);
+        List<IndexImg> IndexImgList = indexImgMapper.selectList(wrapper);
+        return new ResultVo("查询成功", StatusVo.success, IndexImgList);
+    }
+
+    @Override
+    public ResultVo SelectByAllStatus() {
+        QueryWrapper<IndexImg> wrapper = new QueryWrapper<>();
         List<IndexImg> IndexImgList = indexImgMapper.selectList(wrapper);
         return new ResultVo("查询成功", StatusVo.success, IndexImgList);
     }
@@ -42,6 +52,14 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
     }
 
     @Override
+    public ResultVo SelectByName(String Name) {
+        LambdaQueryWrapper<IndexImg> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(IndexImg::getImgName, Name);
+        List<IndexImg> data = indexImgMapper.selectList(wrapper);
+        return new ResultVo("查询成功", StatusVo.success, data);
+    }
+
+    @Override
     public ResultVo AddModel(IndexImg indexImg) {
 
         if (SelectByNameForBoolean(indexImg.getImgName())) {
@@ -49,8 +67,12 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
             return new ResultVo("增加失败:已经存在这个名字", StatusVo.Error, indexImg);
         } else {
 
-            Long id = SelectCout();
-            indexImg.setImgId(String.valueOf(id));
+//            Long id = SelectCout();
+//            indexImg.setImgId(String.valueOf(id));
+
+            UUID uuid = UUID.randomUUID();
+            indexImg.setImgId(String.valueOf(uuid));
+
             indexImg.setCreateTime(new Date());
             indexImg.setUpdateTime(new Date());
 
@@ -107,6 +129,27 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
             return new ResultVo("更新失败，该轮播图不存在", StatusVo.Error, null);
         }
 
+    }
+
+    @Override
+    public ResultVo UpdateStatusById(String Id) {
+        if (SelectByIdForBoolean(Id)) {
+
+            IndexImg data = indexImgMapper.selectById(Id);
+
+
+            if (data.getStatus().equals(0)) {
+                data.setStatus(1);
+            } else {
+                data.setStatus(0);
+            }
+
+
+            indexImgMapper.updateById(data);
+            return new ResultVo("更新成功", StatusVo.success, null);
+        } else {
+            return new ResultVo("更新失败，该轮播图不存在", StatusVo.Error, null);
+        }
     }
 
     @Override

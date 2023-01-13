@@ -6,6 +6,8 @@ spring:
     password: 19990213
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+
+
 mybatis-plus:
   mapper-locations: classpath*:mappers/*Mapper.xml
   type-aliases-package: com.PineappleStore.entity

@@ -33,16 +33,36 @@ public class IndexImgController {
         return indexImgService.SelectByAll();
     }
 
+    @GetMapping("/listStatus")
+    @ApiOperation(value = "获取全部数据不受staus影响", notes = "获取全部数据")
+    public ResultVo SelectByAllStatus() {
+        return indexImgService.SelectByAllStatus();
+    }
+
     @GetMapping("/getId/{id}")
     @ApiOperation(value = "根据ID获取一条数据", notes = "根据ID获取一条数据")
     public ResultVo SelectById(@PathVariable String id) {
         return indexImgService.SelectById(id);
     }
 
+
+    @GetMapping("/likeName/{name}")
+    @ApiOperation(value = "根据name进行模糊查询", notes = "根据name进行模糊查询")
+    public ResultVo SelectByName(@PathVariable String name) {
+        return indexImgService.SelectByName(name);
+    }
+
     @PutMapping("/")
     @ApiOperation(value = "更新数据", notes = "提交model进行更新")
     public ResultVo UpdateByModel(@RequestBody IndexImg indexImg) {
         return indexImgService.UpdateByModel(indexImg);
+    }
+
+
+    @PutMapping("/{id}")
+    @ApiOperation(value = "根据id更新Status数据状态", notes = "提交model进行更新")
+    public ResultVo UpdateByModel(@PathVariable String id) {
+        return indexImgService.UpdateStatusById(id);
     }
 
     @DeleteMapping("/{id}")

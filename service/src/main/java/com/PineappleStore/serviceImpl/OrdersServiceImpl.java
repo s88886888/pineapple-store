@@ -15,6 +15,8 @@ import com.alipay.easysdk.kernel.util.ResponseChecker;
 import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +60,30 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     public ResultVo SelectByAll() {
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
         List<Orders> OrdersList = ordersMapper.selectList(wrapper);
+        return new ResultVo("查询成功", StatusVo.success, OrdersList);
+    }
+
+    @Override
+    public ResultVo SelectByPage(Integer id, String name, String status, String dataTimeOnew, String datatimeTwo, int current, int size) {
+
+        MPJLambdaWrapper<Orders> wrapper = new MPJLambdaWrapper<Orders>()
+                .select(Users::getUsername)
+                .selectAll(Orders.class)
+                .leftJoin(Users.class, Users::getUserId, Orders::getUserId);
+
+        if (id != null) {
+            wrapper.eq(Orders::getOrderId, id);
+        }
+        if (name != null) {
+            wrapper.like(Users::getUsername, name);
+        }
+        if (status != null && !status.equals("0")) {
+            wrapper.eq(Orders::getStatus, status);
+        }
+
+
+        IPage<OrdersVo> OrdersList = ordersMapper.selectJoinPage(new Page<>(current, size), OrdersVo.class, wrapper);
+
         return new ResultVo("查询成功", StatusVo.success, OrdersList);
     }
 
@@ -238,6 +264,24 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         boolean checkModel = SelectByIdForBoolean(Id);
 
         if (checkModel) {
+
+
+            LambdaQueryWrapper<OrderItem> wrapper = new LambdaQueryWrapper<>();
+
+
+            wrapper.eq(OrderItem::getOrderId, Id);
+
+            List<OrderItem> data = orderItemMapper.selectList(wrapper);
+
+            //这里后期一定要加回滚事务 QAQ
+            if (data == null) {
+                return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, null);
+            } else {
+                for (OrderItem datum : data) {
+                    orderItemMapper.deleteById(datum.getItemId());
+                }
+            }
+
             int category = ordersMapper.deleteById(Id);
             if (category > 0) {
                 return new ResultVo("删除成功", StatusVo.success, null);

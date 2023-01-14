@@ -20,6 +20,8 @@ public interface OrdersService extends MPJBaseService<Orders> {
 
     ResultVo SelectByAll();
 
+    ResultVo SelectByPage(Integer id, String name, String status, String dataTimeOnew, String datatimeTwo, int Current, int size);
+
     ResultVo SelectById(String Id);
 
     ResultVo SelectByUserId(String Id);

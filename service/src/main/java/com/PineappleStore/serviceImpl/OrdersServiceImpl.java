@@ -64,17 +64,17 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
     @Override
-    public ResultVo SelectByPage(Integer id, String name, String status, String dataTimeOnew, String datatimeTwo, int current, int size) {
+    public ResultVo SelectByPage(String id, String name, String status, String dataTimeOnew, String datatimeTwo, int current, int size) {
 
         MPJLambdaWrapper<Orders> wrapper = new MPJLambdaWrapper<Orders>()
                 .select(Users::getUsername)
                 .selectAll(Orders.class)
                 .leftJoin(Users.class, Users::getUserId, Orders::getUserId);
 
-        if (id != null) {
+        if (id != null && !id.equals("")) {
             wrapper.eq(Orders::getOrderId, id);
         }
-        if (name != null) {
+        if (name != null && !name.equals("")) {
             wrapper.like(Users::getUsername, name);
         }
         if (status != null && !status.equals("0")) {

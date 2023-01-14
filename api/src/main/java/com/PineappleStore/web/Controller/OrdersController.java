@@ -38,7 +38,7 @@ public class OrdersController {
 
     @GetMapping("/Page")
     @ApiOperation(value = "分页查询", notes = "分页查询")
-    public ResultVo SelectByPage(@RequestParam(required = false) Integer id,
+    public ResultVo SelectByPage(@RequestParam(required = false) String id,
                                  @RequestParam(required = false) String name,
                                  @RequestParam(required = false) String status,
                                  @RequestParam(required = false) String dataTimeOne,

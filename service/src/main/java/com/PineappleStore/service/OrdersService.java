@@ -30,6 +30,7 @@ public interface OrdersService extends MPJBaseService<Orders> {
 
     ResultVo UpdateByModel(Orders orders);
 
+
     ResultVo DeleteById(String Id);
 
     ResultVo AddModel(OrdersVo orders);

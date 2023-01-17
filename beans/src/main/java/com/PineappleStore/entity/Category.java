@@ -78,7 +78,7 @@ public class Category implements Serializable {
     /**
      * 分类广告图片
      */
-    private int categoryImg;
+    private String categoryImg;
 
 
 }

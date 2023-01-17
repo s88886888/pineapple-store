@@ -19,6 +19,11 @@ public interface CategoryService extends IService<Category> {
 
     ResultVo SelectByAll();
 
+
+    ResultVo SelectByAll(int Level);
+
+    ResultVo SelectPage(Integer Id, String Name, String slogan, Integer Status, int current, int size);
+
     ResultVo SelectById(int Id);
 
 

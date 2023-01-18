@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -61,10 +62,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
 
     @Override
-    public ResultVo SelectPage(Integer Id, String Name, String slogan, Integer Status, int current, int size) {
+    public ResultVo SelectPage(Integer Id, String Name, String slogan, Integer Status, Integer level, int current, int size) {
 
 
-        MPJLambdaWrapper<Category> wrapper = new MPJLambdaWrapper<>();
+        MPJLambdaWrapper<Category> wrapper = new MPJLambdaWrapper<Category>()
+                .selectAll(Category.class);
 
 
         if (Id != null && !Id.equals(0)) {
@@ -79,6 +81,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         if (Status != null && !Status.equals(0)) {
             wrapper.eq(Category::getCategoryStar, Status);
         }
+        if (level != null && !level.equals(0)) {
+            wrapper.eq(Category::getCategoryLevel, level);
+        }
 
 
         IPage<Category> categoryList = categoryMapper.selectPage(new Page<>(current, size), wrapper);
@@ -91,6 +96,16 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     public ResultVo SelectById(int Id) {
         Category category = categoryMapper.selectById(Id);
         return new ResultVo("查询成功", StatusVo.success, category);
+    }
+
+    @Override
+    public ResultVo SelectByParentId(int parentId, int current, int size) {
+        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<Category>()
+                .eq(Category::getParentId, parentId);
+
+        IPage<Category> data = categoryMapper.selectPage(new Page<>(current, size), wrapper);
+        return new ResultVo("查询成功", StatusVo.success, data);
+
     }
 
 
@@ -185,19 +200,29 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public ResultVo UpdateByModel(Category category) {
+        if (category.getCategoryStar() == 1) {
+            LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<Category>().eq(Category::getCategoryStar, 1);
+            List<Category> data = categoryMapper.selectList(wrapper);
 
-
-        if (category.getCategoryStar() == 1 && !SelectByCategoryStarCount()) {
-            return new ResultVo("更新失败:推荐商品不能超过数量:10", StatusVo.Error, null);
-        }
-        if (SelectByIdForBoolean(category.getCategoryId())) {
-            categoryMapper.updateById(category);
-            return new ResultVo("更新成功", StatusVo.success, null);
+            for (Category datum : data) {
+                if (Objects.equals(datum.getCategoryId(), category.getCategoryId())) {
+                    categoryMapper.updateById(category);
+                    return new ResultVo("更新成功", StatusVo.success, null);
+                }
+            }
         } else {
-            return new ResultVo("更新失败，该商品不存在", StatusVo.Error, null);
+            if (SelectByIdForBoolean(category.getCategoryId())) {
+                categoryMapper.updateById(category);
+                return new ResultVo("更新成功", StatusVo.success, null);
+            } else {
+                return new ResultVo("更新失败，该分类不存在", StatusVo.Error, null);
+            }
         }
 
+
+        return new ResultVo("更新失败，系统错误", StatusVo.wrong, null);
     }
+
 
     @Override
     public boolean SelectByNameForBoolean(String Name) {

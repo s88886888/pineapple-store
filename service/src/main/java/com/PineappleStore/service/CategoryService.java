@@ -22,9 +22,11 @@ public interface CategoryService extends IService<Category> {
 
     ResultVo SelectByAll(int Level);
 
-    ResultVo SelectPage(Integer Id, String Name, String slogan, Integer Status, int current, int size);
+    ResultVo SelectPage(Integer Id, String Name, String slogan, Integer Status, Integer level, int current, int size);
 
     ResultVo SelectById(int Id);
+
+    ResultVo SelectByParentId(int parentId, int current, int size);
 
 
     ResultVo SelectByCategoryStar(int Star);

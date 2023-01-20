@@ -15,15 +15,21 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface ProductSkuService extends IService<ProductSku> {
 
 
-    ResultVo SelectByAll();
+    ResultVo SelectPage(int current, int size);
+
+    ResultVo SelectPage(String productId, String productName, String SkuId, String SkuName, int Stock, int Status, int current, int size);
 
     ResultVo SelectById(String Id);
 
     ResultVo UpdateByModel(ProductSku productSku);
 
+    ResultVo UpdateStock(ProductSku productSku);
+
     ResultVo DeleteById(String Id);
 
     ResultVo AddModel(ProductSku productSku);
+
+    ResultVo Delete(String Id);
 
 
 }

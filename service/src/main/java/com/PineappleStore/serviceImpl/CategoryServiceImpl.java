@@ -3,15 +3,20 @@ package com.PineappleStore.serviceImpl;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.CategoryMapper;
+import com.PineappleStore.dao.ProductMapper;
 import com.PineappleStore.entity.*;
 import com.PineappleStore.service.CategoryService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -27,6 +32,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Autowired
     private CategoryMapper categoryMapper;
 
+    @Autowired
+    private ProductMapper productMapper;
+
 
     @Override
     public ResultVo SelectByAll() {
@@ -41,10 +49,67 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     }
 
+
+    @Override
+    public ResultVo SelectByAll(int Level) {
+        //定义一个规则集合
+        QueryWrapper<Category> wrapper = new QueryWrapper<>();
+
+        wrapper.lambda().eq(Category::getCategoryLevel, Level);
+
+        //"sql "
+        List<Category> categoryList = categoryMapper.selectList(wrapper);
+
+
+        return new ResultVo("查询成功", StatusVo.success, categoryList);
+    }
+
+
+    @Override
+    public ResultVo SelectPage(Integer Id, String Name, String slogan, Integer Status, Integer level, int current, int size) {
+
+
+        MPJLambdaWrapper<Category> wrapper = new MPJLambdaWrapper<Category>()
+                .selectAll(Category.class);
+
+
+        if (Id != null && !Id.equals(0)) {
+            wrapper.eq(Category::getCategoryId, Id);
+        }
+        if (Name != null && !Name.equals("")) {
+            wrapper.like(Category::getCategoryName, Name);
+        }
+        if (slogan != null && !slogan.equals("")) {
+            wrapper.like(Category::getCategorySlogan, slogan);
+        }
+        if (Status != null && !Status.equals(0)) {
+            wrapper.eq(Category::getCategoryStar, Status);
+        }
+        if (level != null && !level.equals(0)) {
+            wrapper.eq(Category::getCategoryLevel, level);
+        }
+
+
+        IPage<Category> categoryList = categoryMapper.selectPage(new Page<>(current, size), wrapper);
+
+
+        return new ResultVo("查询成功", StatusVo.success, categoryList);
+    }
+
     @Override
     public ResultVo SelectById(int Id) {
         Category category = categoryMapper.selectById(Id);
         return new ResultVo("查询成功", StatusVo.success, category);
+    }
+
+    @Override
+    public ResultVo SelectByParentId(int parentId, int current, int size) {
+        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<Category>()
+                .eq(Category::getParentId, parentId);
+
+        IPage<Category> data = categoryMapper.selectPage(new Page<>(current, size), wrapper);
+        return new ResultVo("查询成功", StatusVo.success, data);
+
     }
 
 
@@ -55,11 +120,20 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         MPJLambdaWrapper<Category> wrapper = new MPJLambdaWrapper<Category>()
 
                 .selectAll(Category.class).eq(Category::getCategoryStar, Star)
-                .selectCollection(Product.class, CategoryVO::getProductList, map -> map.collection(ProductImg.class, ProductListVo::getImgList))
+
+                .selectCollection(Product.class, CategoryVO::getProductList,
+                        map -> map.collection(ProductImg.class, ProductListVo::getImgList))
                 .leftJoin(Product.class, Product::getCategoryId, Category::getCategoryId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
                 .eq(ProductImg::getIsMain, 1)
                 .orderByAsc(Category::getCategoryId);
+
+        if (Star == 1) {
+            wrapper.eq(Product::getProductStar, 1);
+        }
+        if (Star == 2) {
+            wrapper.eq(Product::getProductPreferred, 1);
+        }
 
 
         List<CategoryVO> data = categoryMapper.selectJoinList(CategoryVO.class, wrapper);
@@ -87,12 +161,24 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         if (category.getCategoryStar() == 1 && !SelectByCategoryStarCount()) {
             return new ResultVo("增加失败:推荐商品不能超过数量:10", StatusVo.Error, null);
         } else {
+
+            if (category.getCategoryStar() == 2) {
+                LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Category::getCategoryStar, 3);
+                Long dataCount = categoryMapper.selectCount(wrapper);
+                if (dataCount == 1) {
+                    return new ResultVo("添加失败，请先取消其他模块【菠萝推荐】", StatusVo.Error, null);
+                }
+            }
+
             int i = categoryMapper.insert(category);
             if (i > 0) {
                 return new ResultVo("增加成功", StatusVo.success, null);
             } else {
                 return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
             }
+
+
         }
     }
 
@@ -108,38 +194,67 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public ResultVo DeleteById(int Id) {
+        if (SelectByIdForBoolean(Id)) {
 
-        boolean Checkmodel = SelectByIdForBoolean(Id);
-        if (Checkmodel) {
+            Long data = productMapper.selectCount(new MPJLambdaWrapper<Product>().select(Product::getProductId)
+                    .eq(Product::getCategoryId, Id));
+
+            System.out.println(data + "-------------------------------------------");
+
+
+            if (data != 0) {
+                return new ResultVo("删除失败：请先清除该分类下的商品", StatusVo.Error, null);
+            }
             int category = categoryMapper.deleteById(Id);
             if (category > 0) {
-                return new ResultVo("删除成功", StatusVo.success, Checkmodel);
+                return new ResultVo("删除成功", StatusVo.success, null);
             } else {
-                return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, Checkmodel);
+                return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, null);
             }
-
         } else {
-            return new ResultVo("删除失败：这个商品不存在", StatusVo.Error, Checkmodel);
+            return new ResultVo("删除失败：这个商品不存在", StatusVo.Error, null);
         }
+
 
     }
 
 
     @Override
     public ResultVo UpdateByModel(Category category) {
+        if (category.getCategoryStar() == 1) {
+            LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<Category>().eq(Category::getCategoryStar, 1);
+            List<Category> data = categoryMapper.selectList(wrapper);
 
-
-        if (category.getCategoryStar() == 1 && !SelectByCategoryStarCount()) {
-            return new ResultVo("更新失败:推荐商品不能超过数量:10", StatusVo.Error, null);
+            for (Category datum : data) {
+                if (Objects.equals(datum.getCategoryId(), category.getCategoryId())) {
+                    categoryMapper.updateById(category);
+                    return new ResultVo("更新成功", StatusVo.success, null);
+                }
+            }
         }
-        if (SelectByIdForBoolean(category.getCategoryId())) {
-            categoryMapper.updateById(category);
-            return new ResultVo("更新成功", StatusVo.success, null);
+        if (category.getCategoryStar() == 2) {
+
+            LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<Category>().eq(Category::getCategoryStar, 2);
+            Long data = categoryMapper.selectCount(wrapper);
+
+            if (data != 0) {
+                return new ResultVo("更新失败，请先取消其他模块【菠萝推荐】", StatusVo.Error, null);
+            } else {
+                categoryMapper.updateById(category);
+                return new ResultVo("更新成功", StatusVo.success, null);
+            }
+
         } else {
-            return new ResultVo("更新失败，该商品不存在", StatusVo.Error, null);
+            if (SelectByIdForBoolean(category.getCategoryId())) {
+                categoryMapper.updateById(category);
+                return new ResultVo("更新成功", StatusVo.success, null);
+            } else {
+                return new ResultVo("更新失败，该分类不存在", StatusVo.Error, null);
+            }
         }
 
     }
+
 
     @Override
     public boolean SelectByNameForBoolean(String Name) {
@@ -176,7 +291,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 .leftJoin(Product.class, Product::getCategoryId, Category::getCategoryId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
                 .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
-
                 .eq(ProductImg::getIsMain, 1)
                 .eq(Category::getParentId, categoryId.getCategoryId());
 

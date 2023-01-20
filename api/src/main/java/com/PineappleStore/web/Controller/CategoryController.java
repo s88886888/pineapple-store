@@ -36,12 +36,35 @@ public class CategoryController {
 
     }
 
+    @GetMapping("/getlistByLevel")
+    @ApiOperation(value = "获取全部数据根据Level", notes = "获取全部数据根据Level")
+    public ResultVo SelectByAll(@RequestParam Integer Level) {
+        return categoryService.SelectByAll(Level);
+    }
+
+    @GetMapping("/SelectPage")
+    @ApiOperation(value = "分页获取全部数据", notes = "分页获取全部数据")
+    public ResultVo SelectByAll(@RequestParam(required = false) Integer categoryId,
+                                @RequestParam(required = false) String Name,
+                                @RequestParam(required = false) String slogan,
+                                @RequestParam(required = false) Integer Status,
+                                @RequestParam(required = false) Integer level,
+                                @RequestParam int current,
+                                @RequestParam int size) {
+        return categoryService.SelectPage(categoryId, Name, slogan, Status, level, current, size);
+    }
+
     @GetMapping("/getId/{id}")
     @ApiOperation(value = "根据ID获取一条数据", notes = "根据ID获取一条数据")
     public ResultVo SelectById(@PathVariable int id) {
         return categoryService.SelectById(id);
+    }
 
 
+    @GetMapping("/getParentId")
+    @ApiOperation(value = "根据ID获取一条数据", notes = "根据ID获取一条数据")
+    public ResultVo SelectByParentId(@RequestParam int parentId, @RequestParam int current, @RequestParam int size) {
+        return categoryService.SelectByParentId(parentId, current, size);
     }
 
     @PutMapping("/")
@@ -49,7 +72,6 @@ public class CategoryController {
     public ResultVo UpdateByModel(@RequestBody Category Category) {
 
         return categoryService.UpdateByModel(Category);
-
 
     }
 

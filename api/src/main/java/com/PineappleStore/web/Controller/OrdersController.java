@@ -36,6 +36,18 @@ public class OrdersController {
         return ordersService.SelectByAll();
     }
 
+    @GetMapping("/Page")
+    @ApiOperation(value = "分页查询", notes = "分页查询")
+    public ResultVo SelectByPage(@RequestParam(required = false) String id,
+                                 @RequestParam(required = false) String name,
+                                 @RequestParam(required = false) String status,
+                                 @RequestParam(required = false) String dataTimeOne,
+                                 @RequestParam(required = false) String dataTimeTwo,
+                                 @RequestParam int current,
+                                 @RequestParam int size) {
+        return ordersService.SelectByPage(id, name, status, dataTimeOne, dataTimeTwo, current, size);
+    }
+
     @GetMapping("/getId/{id}")
     @ApiOperation(value = "根据ID获取一条数据", notes = "根据ID获取一条数据")
     public ResultVo SelectById(@PathVariable String id) {

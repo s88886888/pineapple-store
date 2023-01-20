@@ -3,9 +3,12 @@ package com.PineappleStore.serviceImpl;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
+import com.PineappleStore.dao.CategoryMapper;
+import com.PineappleStore.dao.ProductImgMapper;
 import com.PineappleStore.dao.ProductMapper;
 import com.PineappleStore.entity.*;
 import com.PineappleStore.service.ProductService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -32,6 +35,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Autowired
     private ProductMapper ProductMapper;
 
+    @Autowired
+    private ProductImgMapper productImgMapper;
+
+    @Autowired
+    private CategoryMapper categoryMapper;
+
     @Override
     public ResultVo SelectByAll() {
 
@@ -51,6 +60,20 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         return new ResultVo("查询成功", StatusVo.success, product);
     }
 
+    @Override
+    public ResultVo SelectImgListById(int Id) {
+
+        MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
+
+                .selectAll(Product.class)
+                .selectCollection(ProductImg.class, ProductVo::getImgList)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .eq(Product::getProductId, Id);
+
+        List<ProductVo> data = ProductMapper.selectJoinList(ProductVo.class, wrapper);
+        return new ResultVo("查询成功", StatusVo.success, data);
+    }
+
 
     @Override
     public ResultVo SelectByIdForProductImg(int Id) {
@@ -68,14 +91,57 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Override
     public ResultVo SelectByAllForProductImgAndProductSku(int current, int size) {
-        IPage<ProductVo> ProductVo = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, new MPJLambdaWrapper<Product>()
-                .selectAll(Product.class)
-                .selectAll(ProductImg.class)
-                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId)
-                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
-                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1));
 
-        return new ResultVo("查询成功", StatusVo.success, ProductVo);
+
+        MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
+                .select(Category::getCategoryName)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId)
+                .selectAll(Product.class).eq(Product::getProductStatus, 1)
+                .selectAll(ProductImg.class)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
+                .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1);
+        IPage<ProductVo> data = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, wrapper);
+        return new ResultVo("查询成功", StatusVo.success, data);
+    }
+
+
+    @Override
+    public ResultVo SelectLikeNameForProductImgAndProductSku(String Name, int current, int size) {
+
+
+        MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
+                .select(Category::getCategoryName)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId)
+                .selectAll(Product.class).eq(Product::getProductStatus, 1)
+                .selectAll(ProductImg.class)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
+                .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1)
+                .like(Product::getProductName, Name);
+
+
+        IPage<ProductVo> data = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, wrapper);
+        return new ResultVo("查询成功", StatusVo.success, data);
+    }
+
+
+    @Override
+    public ResultVo SelectByAllPage(int current, int size) {
+        MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
+                .select(Category::getCategoryName)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId)
+                .selectAll(Product.class)
+                .selectCollection(ProductImg.class, ProductVo::getImages)
+
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1);
+
+        IPage<ProductVo> data = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, wrapper);
+
+
+        return new ResultVo("查询成功", StatusVo.success, data);
     }
 
 
@@ -86,7 +152,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .selectAll(Product.class)
                 .selectAll(ProductImg.class)
                 .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
-                .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId)
+                .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId).eq(Product::getProductPreferred, 1)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
                 .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1)
                 .eq(Category::getCategoryStar, star)
@@ -146,20 +212,36 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
-    public ResultVo selectByNameForProductImgAndProductSku(String Name, int current, int size) {
+    public ResultVo selectByNameForProductImgAndProductSku(String Id, String Name, int categoryId, String content, int status, int current, int size) {
 
-        IPage<ProductVo> ProductVo = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, new MPJLambdaWrapper<Product>()
-                .selectAll(Product.class)
+        MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
+                .select(Category::getCategoryName)
+                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId)
+                .selectAll(Product.class).eq(Product::getProductStatus, status)
                 .selectAll(ProductImg.class)
-                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
-                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
-                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
-                .like(Product::getProductName, Name)
-                .eq(ProductImg::getIsMain, 1)
-                .eq(ProductSku::getSkuStar, 1)
-        );
+                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
+                .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1);
 
-        return new ResultVo("查询成功", StatusVo.success, ProductVo);
+        if (Id != null) {
+            wrapper.like(Product::getProductId, Id);
+        }
+        if (Name != null) {
+            wrapper.like(Product::getProductName, Name);
+        }
+        if (categoryId != 0) {
+            wrapper.eq(Product::getCategoryId, categoryId);
+        }
+        if (content != null) {
+            wrapper.like(Product::getContent, content);
+        }
+        if (content != null) {
+            wrapper.like(Product::getContent, content);
+        }
+
+
+        IPage<ProductVo> data = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, wrapper);
+        return new ResultVo("查询成功", StatusVo.success, data);
     }
 
     @Override
@@ -192,9 +274,27 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         boolean Checkmodel = SelectByIdForBoolean(Id);
         if (Checkmodel) {
+
+//            MPJLambdaWrapper<ProductImg> wrapper =new MPJLambdaWrapper<ProductImg>().
+//                    selectAll(ProductImg.class).
+//                    eq(ProductImg::getItemId,Id);
+//            List<ProductImg>  data =productImgMapper.selectList(wrapper);
+//
+//            System.out.println(data+"-----------------------------------------------");
+////
+////            //偷懒不写 事务回滚  你是一个成熟的系统了 一定不会断网，断电，宕机。
+//            for (ProductImg datum : data) {
+//                productImgMapper.deleteById(datum.getId());
+//                int isok = productImgMapper.deleteById(datum.getId());
+//                if(isok<0)
+//                {
+//                    return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, null);
+//                }
+//            }
+
             int product = ProductMapper.deleteById(Id);
             if (product > 0) {
-                return new ResultVo("删除成功", StatusVo.success, Checkmodel);
+                return new ResultVo("删除成功", StatusVo.success, null);
             } else {
                 return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, Checkmodel);
             }
@@ -217,6 +317,84 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             return new ResultVo("更新失败，该商品不存在", StatusVo.Error, null);
         }
 
+    }
+
+    @Override
+    public ResultVo UpdateStatus(Product product) {
+        if (SelectByIdForBoolean(product.getProductId())) {
+
+
+            Product data = ProductMapper.selectById(product.getProductId());
+
+            if (data.getProductStatus().equals(0)) {
+                data.setProductStatus(1);
+            } else {
+                data.setProductStatus(0);
+            }
+
+            ProductMapper.updateById(data);
+
+            return new ResultVo("更新成功", StatusVo.success, null);
+        } else {
+            return new ResultVo("更新失败，该商品不存在", StatusVo.Error, null);
+        }
+    }
+
+    @Override
+    public ResultVo UpdateRecommend(Product product) {
+        Product data = ProductMapper.selectOne(new LambdaQueryWrapper<Product>()
+                .eq(Product::getProductId, product.getProductId()));
+
+        if (data == null) {
+            return new ResultVo("更新失败，该商品不存在", StatusVo.Error, null);
+        } else {
+            Long sternum = ProductMapper.selectCount(new MPJLambdaWrapper<Product>()
+                    .select(Product::getProductId)
+                    .eq(Product::getCategoryId, data.getCategoryId())
+                    .eq(Product::getProductPreferred, 1));
+
+            if (data.getProductPreferred().equals(1)) {
+                data.setProductPreferred(0);
+            } else {
+                if (sternum >= 7) {
+                    return new ResultVo("更新失败，菠萝推荐的商品数量不能超过7个", StatusVo.Error, null);
+                } else {
+                    data.setProductPreferred(1);
+                }
+            }
+            ProductMapper.updateById(data);
+            return new ResultVo("更新成功", StatusVo.success, null);
+        }
+
+    }
+
+
+    @Override
+    public ResultVo UpdateStar(Product product) {
+
+        Product data = ProductMapper.selectOne(new LambdaQueryWrapper<Product>()
+                .eq(Product::getProductId, product.getProductId()));
+
+        if (data == null) {
+            return new ResultVo("更新失败，该商品不存在", StatusVo.Error, null);
+        } else {
+            Long sternum = ProductMapper.selectCount(new MPJLambdaWrapper<Product>()
+                    .select(Product::getProductId)
+                    .eq(Product::getCategoryId, data.getCategoryId())
+                    .eq(Product::getProductStar, 1));
+
+            if (data.getProductStar().equals(1)) {
+                data.setProductStar(0);
+            } else {
+                if (sternum >= 24) {
+                    return new ResultVo("更新失败，轮播图推荐商品数量不能超过24个", StatusVo.Error, null);
+                } else {
+                    data.setProductStar(1);
+                }
+            }
+            ProductMapper.updateById(data);
+            return new ResultVo("更新成功", StatusVo.success, null);
+        }
     }
 
     @Override

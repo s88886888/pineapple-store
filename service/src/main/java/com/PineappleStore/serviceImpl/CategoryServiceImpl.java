@@ -3,6 +3,7 @@ package com.PineappleStore.serviceImpl;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.CategoryMapper;
+import com.PineappleStore.dao.ProductMapper;
 import com.PineappleStore.entity.*;
 import com.PineappleStore.service.CategoryService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -30,6 +31,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private ProductMapper productMapper;
 
 
     @Override
@@ -116,11 +120,20 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         MPJLambdaWrapper<Category> wrapper = new MPJLambdaWrapper<Category>()
 
                 .selectAll(Category.class).eq(Category::getCategoryStar, Star)
-                .selectCollection(Product.class, CategoryVO::getProductList, map -> map.collection(ProductImg.class, ProductListVo::getImgList))
+
+                .selectCollection(Product.class, CategoryVO::getProductList,
+                        map -> map.collection(ProductImg.class, ProductListVo::getImgList))
                 .leftJoin(Product.class, Product::getCategoryId, Category::getCategoryId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
                 .eq(ProductImg::getIsMain, 1)
                 .orderByAsc(Category::getCategoryId);
+
+        if (Star == 1) {
+            wrapper.eq(Product::getProductStar, 1);
+        }
+        if (Star == 2) {
+            wrapper.eq(Product::getProductPreferred, 1);
+        }
 
 
         List<CategoryVO> data = categoryMapper.selectJoinList(CategoryVO.class, wrapper);
@@ -181,19 +194,27 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public ResultVo DeleteById(int Id) {
+        if (SelectByIdForBoolean(Id)) {
 
-        boolean Checkmodel = SelectByIdForBoolean(Id);
-        if (Checkmodel) {
+            Long data = productMapper.selectCount(new MPJLambdaWrapper<Product>().select(Product::getProductId)
+                    .eq(Product::getCategoryId, Id));
+
+            System.out.println(data + "-------------------------------------------");
+
+
+            if (data != 0) {
+                return new ResultVo("删除失败：请先清除该分类下的商品", StatusVo.Error, null);
+            }
             int category = categoryMapper.deleteById(Id);
             if (category > 0) {
-                return new ResultVo("删除成功", StatusVo.success, Checkmodel);
+                return new ResultVo("删除成功", StatusVo.success, null);
             } else {
-                return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, Checkmodel);
+                return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, null);
             }
-
         } else {
-            return new ResultVo("删除失败：这个商品不存在", StatusVo.Error, Checkmodel);
+            return new ResultVo("删除失败：这个商品不存在", StatusVo.Error, null);
         }
+
 
     }
 
@@ -210,6 +231,19 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                     return new ResultVo("更新成功", StatusVo.success, null);
                 }
             }
+        }
+        if (category.getCategoryStar() == 2) {
+
+            LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<Category>().eq(Category::getCategoryStar, 2);
+            Long data = categoryMapper.selectCount(wrapper);
+
+            if (data != 0) {
+                return new ResultVo("更新失败，请先取消其他模块【菠萝推荐】", StatusVo.Error, null);
+            } else {
+                categoryMapper.updateById(category);
+                return new ResultVo("更新成功", StatusVo.success, null);
+            }
+
         } else {
             if (SelectByIdForBoolean(category.getCategoryId())) {
                 categoryMapper.updateById(category);
@@ -219,8 +253,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             }
         }
 
-
-        return new ResultVo("更新失败，系统错误", StatusVo.wrong, null);
     }
 
 

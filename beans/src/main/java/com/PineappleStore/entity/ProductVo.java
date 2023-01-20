@@ -120,6 +120,18 @@ public class ProductVo {
     private String skuName;
 
 
+    /**
+     * 1为轮播图商品推荐，2为今日特价商品推荐，3为分类推荐
+     */
+    private Integer productStar;
+
+
+    /**
+     * 商品优选
+     */
+    private Integer productPreferred;
+
+
     private String categoryName;
 
 

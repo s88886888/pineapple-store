@@ -86,13 +86,14 @@ public class ProductController {
     }
 
 
-//    @GetMapping("/getProductName/{id}")
-//    @ApiOperation(value = "模糊查询商品数据（含图片价格）", notes = "根据一条id获取商品（图片价格）")
-//    public ResultVo SelectLikeNameForProductImgAndProductSku(@RequestParam int current, @RequestParam int size,String Name) {
-//
-//        return productService.SelectLikeNameForProductImgAndProductSku(current,size,Name);
-//
-//    }
+    @GetMapping("/getProductName/{Name}")
+    @ApiOperation(value = "模糊查询商品数据（含图片价格）", notes = "根据一条id获取商品（图片价格）")
+    public ResultVo SelectLikeNameForProductImgAndProductSku(@PathVariable String Name, @RequestParam int current, @RequestParam int size) {
+
+
+        return productService.SelectLikeNameForProductImgAndProductSku(Name, current, size);
+
+    }
 
     @GetMapping("/getProductName")
     @ApiOperation(value = "根据商品名字查找（图片价格）", notes = "根据一条id获取商品（图片价格）")
@@ -118,6 +119,23 @@ public class ProductController {
     public ResultVo UpdateStatus(@RequestBody Product Product) {
 
         return productService.UpdateStatus(Product);
+
+    }
+
+
+    @PutMapping("/UpdateStar")
+    @ApiOperation(value = "更新推荐", notes = "提交model进行更新")
+    public ResultVo UpdateStar(@RequestBody Product Product) {
+
+        return productService.UpdateStar(Product);
+
+    }
+
+    @PutMapping("/UpdateRecommend")
+    @ApiOperation(value = "更新菠萝推荐", notes = "提交model进行更新")
+    public ResultVo UpdateRecommend(@RequestBody Product Product) {
+
+        return productService.UpdateRecommend(Product);
 
     }
 

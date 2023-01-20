@@ -25,6 +25,8 @@ public interface ProductService extends IService<Product> {
 
     ResultVo SelectByAllForProductImgAndProductSku(int current, int size);
 
+    ResultVo SelectLikeNameForProductImgAndProductSku(String Name, int current, int size);
+
 
     ResultVo SelectByAllPage(int current, int size);
 
@@ -37,6 +39,10 @@ public interface ProductService extends IService<Product> {
     ResultVo UpdateByModel(Product Product);
 
     ResultVo UpdateStatus(Product Product);
+
+    ResultVo UpdateRecommend(Product Product);
+
+    ResultVo UpdateStar(Product Product);
 
     ResultVo DeleteById(String Id);
 

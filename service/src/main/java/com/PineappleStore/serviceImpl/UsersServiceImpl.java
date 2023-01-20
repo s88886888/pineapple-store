@@ -3,16 +3,14 @@ package com.PineappleStore.serviceImpl;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.ResultVo.TokenVo;
-import com.PineappleStore.Utils.Client;
 import com.PineappleStore.Utils.DingxiangCheck;
 import com.PineappleStore.Utils.Md5Utils;
+import com.PineappleStore.Utils.smsBao;
 import com.PineappleStore.dao.UserChenckMapper;
 import com.PineappleStore.dao.UsersMapper;
 import com.PineappleStore.entity.UserChenck;
 import com.PineappleStore.entity.Users;
 import com.PineappleStore.service.UsersService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,7 +22,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 
 /**
@@ -45,6 +46,10 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Autowired
     private UserChenckMapper userChenckMapper;
+
+
+    @Autowired
+    private smsBao smsBao;
 
     public boolean CheckUserByName(String userName) {
 
@@ -223,43 +228,13 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                     }
                 }
 
-
-                Client client = new Client();
-                Client.Request request = new Client.Request();
-
-                //创建json 发送对象
-                JSONObject send = new JSONObject();
-
                 //随机生成4位随机验证码
                 Random randObj = new Random();
                 Integer phoneCode = (1000 + randObj.nextInt(9000));
 
-                //手机号
-                Set<String> phoneList = new HashSet<>();
-                phoneList.add(phone);
-                send.put("mobile", phoneList);
-                send.put("type", 0);
-                send.put("template_id", "ST_2020101100000005");
-                send.put("sign", "闪验");
-                send.put("send_time", "");
+                int isok = smsBao.getSmsCode(phone, phoneCode);
 
-                //发送随机的验证码
-                Map<String, Integer> code = new HashMap<>();
-                code.put("code", phoneCode);
-                send.put("params", code);
-                request.setBizContent(String.valueOf(send));
-                request.setMethod("sms.message.send");
-
-
-                //发送验证码
-                JSONObject jsonObject = JSON.parseObject(client.execute(request));
-                //{"code":0,"message":"请求成功","data":{"code":10004,"message":"发送失败，短信签名错误"}}
-
-                Map map = (Map) jsonObject.get("data");
-                //{"code":10004,"message":"发送失败，短信签名错误"}
-
-
-                if (map.get("code").equals(0)) {
+                if (isok == 1) {
 
                     UserChenck model = new UserChenck();
                     model.setPhone(phone);
@@ -271,10 +246,10 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                         return new ResultVo("系统错误，请稍后再试", StatusVo.wrong, null);
                     }
 
-                    return new ResultVo("验证码发送成功，验证码有效期5分钟", StatusVo.success, map.get("message"));
+                    return new ResultVo("验证码发送成功，验证码有效期5分钟", StatusVo.success, null);
 
                 } else {
-                    return new ResultVo("发送手机验证码失败大概率是因为欠费，服务商返回：" + map.get("message"), StatusVo.Error, null);
+                    return new ResultVo("发送手机验证码失败大概率是因为欠费，服务商返回：" + isok, StatusVo.Error, null);
                 }
 
 

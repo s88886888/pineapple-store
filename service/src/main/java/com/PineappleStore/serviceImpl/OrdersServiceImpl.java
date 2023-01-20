@@ -15,6 +15,8 @@ import com.alipay.easysdk.kernel.util.ResponseChecker;
 import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +64,42 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
     @Override
+    public ResultVo SelectByPage(String id, String name, String status, String dataTimeOne, String datatimeTwo, int current, int size) {
+
+        MPJLambdaWrapper<Orders> wrapper = new MPJLambdaWrapper<Orders>()
+                .select(Users::getUsername)
+                .selectAll(Orders.class)
+                .leftJoin(Users.class, Users::getUserId, Orders::getUserId)
+                .orderByDesc(Orders::getCreateTime);
+
+
+        if (id != null && !id.equals("")) {
+            wrapper.eq(Orders::getOrderId, id);
+        }
+        if (name != null && !name.equals("")) {
+            wrapper.like(Users::getUsername, name);
+        }
+        if (status != null && !status.equals("0")) {
+            wrapper.eq(Orders::getStatus, status);
+        }
+        if (dataTimeOne != null && !dataTimeOne.equals("")) {
+            wrapper.ge(Orders::getCreateTime, dataTimeOne);
+        }
+        if (datatimeTwo != null && !datatimeTwo.equals("")) {
+            wrapper.le(Orders::getCreateTime, datatimeTwo);
+        }
+
+
+        IPage<OrdersVo> OrdersList = ordersMapper.selectJoinPage(new Page<>(current, size), OrdersVo.class, wrapper);
+
+        return new ResultVo("查询成功", StatusVo.success, OrdersList);
+    }
+
+    @Override
     public ResultVo SelectById(String Id) {
+
         Orders orders = ordersMapper.selectById(Id);
+
         return new ResultVo("查询成功", StatusVo.success, orders);
     }
 
@@ -88,8 +124,10 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
         MPJLambdaWrapper<Orders> wrapper = new MPJLambdaWrapper<Orders>()
                 .selectAll(Orders.class)
+                .select(Users::getUsername)
                 .selectCollection(OrderItem.class, OrdersVo::getProductList)
                 .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
+                .leftJoin(Users.class, Users::getUserId, Orders::getUserId)
                 .eq(Orders::getOrderId, Id);
 
         List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, wrapper);
@@ -238,6 +276,24 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         boolean checkModel = SelectByIdForBoolean(Id);
 
         if (checkModel) {
+
+
+            LambdaQueryWrapper<OrderItem> wrapper = new LambdaQueryWrapper<>();
+
+
+            wrapper.eq(OrderItem::getOrderId, Id);
+
+            List<OrderItem> data = orderItemMapper.selectList(wrapper);
+
+            //这里后期一定要加回滚事务 QAQ
+            if (data == null) {
+                return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, null);
+            } else {
+                for (OrderItem datum : data) {
+                    orderItemMapper.deleteById(datum.getItemId());
+                }
+            }
+
             int category = ordersMapper.deleteById(Id);
             if (category > 0) {
                 return new ResultVo("删除成功", StatusVo.success, null);
@@ -246,7 +302,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
             }
 
         } else {
-            return new ResultVo("删除失败：该轮播图不存在", StatusVo.Error, null);
+            return new ResultVo("删除失败：该数据不存在", StatusVo.Error, null);
         }
 
     }
@@ -257,7 +313,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         if (SelectByIdForBoolean(orders.getOrderId())) {
             orders.setUpdateTime(new Date());
             ordersMapper.updateById(orders);
-            return new ResultVo("更新成功", StatusVo.success, null);
+            return new ResultVo("更新成功", StatusVo.success, orders);
         } else {
             return new ResultVo("更新失败，该轮播图不存在", StatusVo.Error, null);
         }

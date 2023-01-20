@@ -15,6 +15,9 @@ import java.util.List;
 @NoArgsConstructor
 public class CategoryVO extends Category implements Serializable {
 
+
+    //父级Name
+    private String parentName;
     private List<ProductListVo> productList;
 
 

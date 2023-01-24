@@ -16,6 +16,8 @@ import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 /**
  * <p>
  * 商品规格 每一件商品都有不同的规格，不同的规格又有不同的价格和优惠力度，规格表为此设计 服务实现类
@@ -93,7 +95,20 @@ public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, Product
 
     @Override
     public ResultVo UpdateByModel(ProductSku productSku) {
-        return null;
+
+        ProductSku data = productSkuMapper.selectById(productSku.getSkuId());
+
+        if (data == null) {
+
+            return new ResultVo("修改失败", StatusVo.Error, null);
+
+        } else {
+            productSku.setUpdateTime(new Date());
+            productSkuMapper.updateById(productSku);
+            return new ResultVo("修改成功！", StatusVo.success, null);
+        }
+
+
     }
 
     @Override
@@ -127,7 +142,7 @@ public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, Product
     @Override
     public ResultVo Delete(String Id) {
 
-        ProductSku data = productSkuMapper.selectById(Id);
+//        ProductSku data = productSkuMapper.selectById(Id);
 
         return new ResultVo("不支持删除，请下架，订单中存在该库存信息！", StatusVo.Error, null);
 

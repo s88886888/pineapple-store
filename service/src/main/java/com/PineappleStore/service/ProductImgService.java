@@ -2,6 +2,7 @@ package com.PineappleStore.service;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.ProductImg;
+import com.PineappleStore.entity.imgVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -26,7 +27,7 @@ public interface ProductImgService extends IService<ProductImg> {
 
     ResultVo AddModel(ProductImg ProductImg);
 
-    ResultVo SelectByProductImgCount(int num);
+    ResultVo AddModelList(imgVo list);
 
 
     boolean SelectByIdForBoolean(String Id);

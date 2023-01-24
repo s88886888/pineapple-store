@@ -36,7 +36,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     private ProductMapper ProductMapper;
 
 
-
     @Override
     public ResultVo SelectByAll() {
 

@@ -3,6 +3,7 @@ package com.PineappleStore.web.Controller;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.ProductImg;
+import com.PineappleStore.entity.imgVo;
 import com.PineappleStore.service.ProductImgService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,17 +31,14 @@ public class ProductImgController {
     @GetMapping("/List")
     @ApiOperation(value = "获取全部数据", notes = "获取全部数据")
     public ResultVo SelectByAll() {
-        ResultVo resultVo = productImgService.SelectByAll();
-        return resultVo;
+        return productImgService.SelectByAll();
     }
 
 
     @GetMapping("/Id/{id}")
     @ApiOperation(value = "根据主表ID获取一条数据", notes = "根据ID获取一条数据")
     public ResultVo SelectById(@PathVariable int id) {
-        ResultVo resultVo = productImgService.SelectById(id);
-
-        return resultVo;
+        return productImgService.SelectById(id);
     }
 
 
@@ -48,9 +46,7 @@ public class ProductImgController {
     @ApiOperation(value = "更新数据", notes = "提交model进行更新")
     public ResultVo UpdateByModel(@RequestBody ProductImg productImg) {
 
-        ResultVo resultVo = productImgService.UpdateByModel(productImg);
-
-        return resultVo;
+        return productImgService.UpdateByModel(productImg);
     }
 
     @DeleteMapping("/{id}")
@@ -65,9 +61,18 @@ public class ProductImgController {
     @ApiOperation(value = "增加一条数据", notes = "提交model进行增加数据")
     public ResultVo AddModel(@RequestBody ProductImg productImg) {
 
-        ResultVo resultVo = productImgService.AddModel(productImg);
+        return productImgService.AddModel(productImg);
 
-        return resultVo;
+    }
+
+    @PostMapping("/addList")
+    @ApiOperation(value = "增加一条数据", notes = "提交model进行增加数据")
+    public ResultVo AddModel(@RequestBody imgVo imgVo) {
+
+
+        System.out.println(imgVo + "---------------------------------------------");
+        return productImgService.AddModelList(imgVo);
+
     }
 
 

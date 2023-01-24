@@ -4,13 +4,16 @@ import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.ProductImgMapper;
 import com.PineappleStore.entity.ProductImg;
+import com.PineappleStore.entity.imgVo;
 import com.PineappleStore.service.ProductImgService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * <p>
@@ -47,31 +50,32 @@ public class ProductImgServiceImpl extends ServiceImpl<ProductImgMapper, Product
 
 
     @Override
-    public ResultVo SelectByProductImgCount(int num) {
-
-        QueryWrapper<ProductImg> wrapper = new QueryWrapper<>();
-        Long productCount = productImgMapper.selectCount(wrapper);
-
-        return new ResultVo("查询成功", StatusVo.success, productCount);
-    }
-
-
-    @Override
     public ResultVo AddModel(ProductImg ProductImg) {
 
 
-        if (SelectByProductStarForBoolean(ProductImg.getItemId())) {
-            int i = productImgMapper.insert(ProductImg);
-            if (i > 0) {
-                return new ResultVo("增加成功", StatusVo.success, null);
-            } else {
-                return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
-            }
+        ProductImg.setId(String.valueOf(UUID.randomUUID()));
+        ProductImg.setCreatedTime(new Date());
+        ProductImg.setUpdatedTime(new Date());
+        int i = productImgMapper.insert(ProductImg);
+        if (i > 0) {
+            return new ResultVo("增加成功", StatusVo.success, null);
         } else {
-            return new ResultVo("增加失败：不允许设置两张图片", StatusVo.Error, null);
+            return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
         }
+    }
 
+    @Override
+    public ResultVo AddModelList(imgVo list) {
 
+        for (int i = 0; i < list.getImgList().size(); i++) {
+            list.getImgList().get(i).setId(String.valueOf(UUID.randomUUID()));
+            list.getImgList().get(i).setIsMain(0);
+            list.getImgList().get(i).setItemId(list.getItemId());
+            list.getImgList().get(i).setCreatedTime(new Date());
+            list.getImgList().get(i).setUpdatedTime(new Date());
+            productImgMapper.insert(list.getImgList().get(i));
+        }
+        return new ResultVo("增加商品图片列表成功", StatusVo.success, null);
     }
 
 

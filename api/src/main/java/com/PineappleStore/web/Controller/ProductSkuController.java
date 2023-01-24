@@ -57,6 +57,13 @@ public class ProductSkuController {
         return productSkuService.UpdateStock(productSku);
     }
 
+
+    @PutMapping("/update")
+    @ApiOperation(value = "更新数据", notes = "更新数据")
+    public ResultVo Update(@RequestBody ProductSku productSku) {
+        return productSkuService.UpdateByModel(productSku);
+    }
+
     @DeleteMapping("/delete")
     @ApiOperation(value = "删除一条数据", notes = "删除一条数据")
     public ResultVo Delete(@RequestBody ProductSku productSku) {

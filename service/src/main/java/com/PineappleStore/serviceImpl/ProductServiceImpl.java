@@ -3,8 +3,6 @@ package com.PineappleStore.serviceImpl;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
-import com.PineappleStore.dao.CategoryMapper;
-import com.PineappleStore.dao.ProductImgMapper;
 import com.PineappleStore.dao.ProductMapper;
 import com.PineappleStore.entity.*;
 import com.PineappleStore.service.ProductService;
@@ -17,7 +15,9 @@ import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -35,11 +35,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Autowired
     private ProductMapper ProductMapper;
 
-    @Autowired
-    private ProductImgMapper productImgMapper;
-
-    @Autowired
-    private CategoryMapper categoryMapper;
 
     @Override
     public ResultVo SelectByAll() {
@@ -248,11 +243,16 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     public ResultVo AddModel(Product product) {
 
         if (SelectByNameForBoolean(product.getProductName())) {
-            return new ResultVo("增加失败:已经存在相同名字", StatusVo.Error, product);
+            return new ResultVo("增加失败:已经存在相同的商品名字", StatusVo.Error, product);
         } else {
+
+            product.setProductId(String.valueOf(UUID.randomUUID()));
+            product.setSoldNum(0);
+            product.setCreateTime(new Date());
+            product.setUpdateTime(new Date());
             int i = ProductMapper.insert(product);
             if (i > 0) {
-                return new ResultVo("增加成功", StatusVo.success, null);
+                return new ResultVo("增加成功", StatusVo.success, product);
             } else {
                 return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
             }
@@ -435,8 +435,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .selectCollection(ProductImg.class, ProductVo::getImgList)
                 .selectCollection(ProductSku.class, ProductVo::getSkuList)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
-                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getStatus, 1)
                 .eq(Product::getProductId, Id);
+
 
         List<ProductVo> productVoList = ProductMapper.selectJoinList(ProductVo.class, mpjLambdaWrapper);
         return new ResultVo("查询成功", StatusVo.success, productVoList);

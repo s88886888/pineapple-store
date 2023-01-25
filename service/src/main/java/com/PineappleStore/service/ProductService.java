@@ -19,7 +19,7 @@ public interface ProductService extends IService<Product> {
 
     ResultVo SelectById(int Id);
 
-    ResultVo SelectImgListById(int Id);
+    ResultVo SelectImgListById(String Id);
 
     ResultVo selectByItemid(int Id);
 
@@ -48,8 +48,6 @@ public interface ProductService extends IService<Product> {
 
     ResultVo AddModel(Product Product);
 
-    ResultVo SelectByProductCount(int num);
-
 
     ResultVo selectAllByCategoryIdForProductImgAndProductSku(String Id);
 
@@ -60,8 +58,6 @@ public interface ProductService extends IService<Product> {
     ResultVo selectByNameForProductImgAndProductSku(String Id, String Name, int categoryId, String content, int status, int current, int size);
 
     boolean SelectByIdForBoolean(String Id);
-
-    boolean SelectByNameForBoolean(String Name);
 
 
 }

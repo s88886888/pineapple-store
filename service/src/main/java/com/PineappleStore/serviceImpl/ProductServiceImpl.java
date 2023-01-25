@@ -56,7 +56,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
-    public ResultVo SelectImgListById(int Id) {
+    public ResultVo SelectImgListById(String Id) {
 
         MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
 
@@ -159,15 +159,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
-    public ResultVo SelectByProductCount(int num) {
-
-        QueryWrapper<Product> wrapper = new QueryWrapper<>();
-        Long productCount = ProductMapper.selectCount(wrapper);
-
-        return new ResultVo("查询成功", StatusVo.success, productCount);
-    }
-
-    @Override
     public ResultVo selectAllByCategoryIdForProductImgAndProductSku(String Id) {
 
         List<ProductVo> ProductVo = ProductMapper.selectJoinList(ProductVo.class, new MPJLambdaWrapper<Product>()
@@ -241,11 +232,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Override
     public ResultVo AddModel(Product product) {
-
-        if (SelectByNameForBoolean(product.getProductName())) {
-            return new ResultVo("增加失败:已经存在相同的商品名字", StatusVo.Error, product);
-        } else {
-
             product.setProductId(String.valueOf(UUID.randomUUID()));
             product.setSoldNum(0);
             product.setCreateTime(new Date());
@@ -256,7 +242,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             } else {
                 return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
             }
-        }
     }
 
 
@@ -395,20 +380,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             ProductMapper.updateById(data);
             return new ResultVo("更新成功", StatusVo.success, null);
         }
-    }
-
-    @Override
-    public boolean SelectByNameForBoolean(String Name) {
-
-        QueryWrapper<Product> wrapper = new QueryWrapper<>();
-
-        wrapper.lambda().select(Product::getProductName).eq(Product::getProductName, Name);
-
-        Product product = ProductMapper.selectOne(wrapper);
-
-        return product != null;
-
-
     }
 
 

@@ -3,10 +3,7 @@ package com.PineappleStore.serviceImpl;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.ProductSkuMapper;
-import com.PineappleStore.entity.Product;
-import com.PineappleStore.entity.ProductImg;
-import com.PineappleStore.entity.ProductSku;
-import com.PineappleStore.entity.ProductSkuVo;
+import com.PineappleStore.entity.*;
 import com.PineappleStore.service.ProductSkuService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -15,8 +12,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * <p>
@@ -137,6 +137,42 @@ public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, Product
     @Override
     public ResultVo AddModel(ProductSku productSku) {
         return null;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ResultVo AddModelList(skuVo skuvo) {
+        try {
+            int skuMain = 0;
+            int skuStatus = 0;
+            for (ProductSku item : skuvo.getSkuList()) {
+                if (item.getSkuStar() == 1) {
+                    skuMain++;
+                }
+                if (item.getStatus() == 1) {
+                    skuStatus++;
+                }
+                item.setProductId(skuvo.getProductId());
+                item.setCreateTime(new Date());
+                item.setUpdateTime(new Date());
+                item.setSkuId(UUID.randomUUID().toString());
+                productSkuMapper.insert(item);
+            }
+            if (skuMain != 1) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                return new ResultVo("默认库存设置出错，必须且仅能设置一个", StatusVo.Error, null);
+            } else if (skuStatus < 1) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                return new ResultVo("必须要设置至少一个库存上架", StatusVo.Error, null);
+            } else {
+                return new ResultVo("添加成功", StatusVo.success, null);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException();
+        }
+
+
     }
 
     @Override

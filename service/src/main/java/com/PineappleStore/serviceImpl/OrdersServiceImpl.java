@@ -64,7 +64,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
     @Override
-    public ResultVo SelectByPage(String id, String name, String status, String dataTimeOne, String datatimeTwo, int current, int size) {
+    public ResultVo SelectByPage(String id, String name, String status, String dataTimeOne, String datetimeTwo, int current, int size) {
 
         MPJLambdaWrapper<Orders> wrapper = new MPJLambdaWrapper<Orders>()
                 .select(Users::getUsername)
@@ -85,8 +85,8 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         if (dataTimeOne != null && !dataTimeOne.equals("")) {
             wrapper.ge(Orders::getCreateTime, dataTimeOne);
         }
-        if (datatimeTwo != null && !datatimeTwo.equals("")) {
-            wrapper.le(Orders::getCreateTime, datatimeTwo);
+        if (datetimeTwo != null && !datetimeTwo.equals("")) {
+            wrapper.le(Orders::getCreateTime, datetimeTwo);
         }
 
 
@@ -143,8 +143,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         try {
 
             /*订单表*/
-            UUID uuid = UUID.randomUUID();
-            ordersVo.setOrderId(String.valueOf(uuid));
+            ordersVo.setOrderId(UUID.randomUUID().toString());
             Orders orders = new Orders();
             orders.setOrderId(ordersVo.getOrderId());
             orders.setUserId(ordersVo.getUserId());
@@ -257,7 +256,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
      */
     protected String doOrderNum() {
         Random random = new Random();
-        SimpleDateFormat allTime = new SimpleDateFormat("YYYYMMddHHmmSSS");
+        SimpleDateFormat allTime = new SimpleDateFormat("yyyyMMddHHmmsss");
         String subjectno = allTime.format(new Date()) + random.nextInt(10);
         return subjectno + random.nextInt(10);
     }

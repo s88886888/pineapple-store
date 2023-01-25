@@ -64,7 +64,7 @@ public class ProductController {
 
     @GetMapping("/getImgLisbyId/{id}")
     @ApiOperation(value = "嵌套查询根据主表查询图片", notes = "嵌套查询根据主表查询图片")
-    public ResultVo SelectImgListById(@PathVariable int id) {
+    public ResultVo SelectImgListById(@PathVariable String id) {
         return productService.SelectImgListById(id);
     }
 

@@ -2,6 +2,7 @@ package com.PineappleStore.service;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.ProductSku;
+import com.PineappleStore.entity.skuVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -28,6 +29,8 @@ public interface ProductSkuService extends IService<ProductSku> {
     ResultVo DeleteById(String Id);
 
     ResultVo AddModel(ProductSku productSku);
+
+    ResultVo AddModelList(skuVo skuvo);
 
     ResultVo Delete(String Id);
 

@@ -3,6 +3,7 @@ package com.PineappleStore.web.Controller;
 
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.ProductSku;
+import com.PineappleStore.entity.skuVo;
 import com.PineappleStore.service.ProductSkuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -57,6 +58,12 @@ public class ProductSkuController {
         return productSkuService.UpdateStock(productSku);
     }
 
+
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    @ApiOperation(value = "添加数据", notes = "添加数据")
+    public ResultVo AddModelList(@RequestBody skuVo skuvo) {
+        return productSkuService.AddModelList(skuvo);
+    }
 
     @PutMapping("/update")
     @ApiOperation(value = "更新数据", notes = "更新数据")

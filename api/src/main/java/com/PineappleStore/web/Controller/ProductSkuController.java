@@ -51,6 +51,12 @@ public class ProductSkuController {
         return productSkuService.SelectById(Id);
     }
 
+    @GetMapping("/getItemId")
+    @ApiOperation(value = "根据主表ID获取数据", notes = "获取一条数据")
+    public ResultVo SelectByProductId(@RequestParam String Id) {
+        return productSkuService.SelectByProductId(Id);
+    }
+
 
     @PutMapping("/updateStock")
     @ApiOperation(value = "获取一条数据", notes = "获取一条数据")

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -94,6 +95,15 @@ public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, Product
     }
 
     @Override
+    public ResultVo SelectByProductId(String Id) {
+
+        List<ProductSku> data = productSkuMapper.selectList(new LambdaQueryWrapper<ProductSku>()
+                .eq(ProductSku::getProductId, Id));
+
+        return new ResultVo("查询成功", StatusVo.success, data);
+    }
+
+    @Override
     public ResultVo UpdateByModel(ProductSku productSku) {
 
         ProductSku data = productSkuMapper.selectById(productSku.getSkuId());
@@ -152,11 +162,18 @@ public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, Product
                 if (item.getStatus() == 1) {
                     skuStatus++;
                 }
-                item.setProductId(skuvo.getProductId());
-                item.setCreateTime(new Date());
-                item.setUpdateTime(new Date());
-                item.setSkuId(UUID.randomUUID().toString());
-                productSkuMapper.insert(item);
+
+                if (item.getSkuId() == null) {
+                    item.setProductId(skuvo.getProductId());
+                    item.setCreateTime(new Date());
+                    item.setUpdateTime(new Date());
+                    item.setSkuId(UUID.randomUUID().toString());
+                    productSkuMapper.insert(item);
+                } else {
+                    item.setUpdateTime(new Date());
+                    productSkuMapper.updateById(item);
+                }
+
             }
             if (skuMain != 1) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -174,6 +191,7 @@ public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, Product
 
 
     }
+
 
     @Override
     public ResultVo Delete(String Id) {

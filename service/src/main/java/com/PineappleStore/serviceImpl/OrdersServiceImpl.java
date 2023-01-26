@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -170,7 +171,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 OrderItem orderItem = new OrderItem();
                 //只需要前端给我们的数量和商品ID，根据这些安全信息数据库自己查询，防止第三方修改
                 orderItem.setItemId(doOrderNum());
+
                 orderItem.setProductId(ordersVo.getProductList().get(i).getProductId());
+
 
                 //外键绑定订单表的ID
                 orderItem.setOrderId(ordersVo.getOrderId());
@@ -186,6 +189,13 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                         .eq(Product::getProductId, ordersVo.getProductList().get(i).getProductId());
 
                 ProductVo selectJoinOne = productMapper.selectJoinOne(ProductVo.class, wrapper);
+
+
+                Product product = new Product();
+                product.setProductId(selectJoinOne.getProductId());
+                product.setSoldNum(selectJoinOne.getSoldNum() + ordersVo.getProductList().get(i).getCartNum());
+                productMapper.updateById(product);
+
 
                 orderItem.setProductName(selectJoinOne.getProductName());
                 orderItem.setProductImg(selectJoinOne.getUrl());
@@ -230,6 +240,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                     int isok = orderItemMapper.insert(orderItem);
 
                     if (isok < 1) {
+                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                         return new ResultVo("结算失败：请检查库存", StatusVo.Error, null);
                     }
                 }
@@ -237,6 +248,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 for (String id : shopIdList) {
                     int deleter = shoppingCartMapper.deleteById(id);
                     if (deleter < 1) {
+                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                         return new ResultVo("结算失败：请刷新购物车", StatusVo.Error, null);
                     }
                 }
@@ -435,10 +447,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
 
         for (Orders order : orders) {
-
-
             calendar.setTime(order.getCreateTime()); //需要将date数据转移到Calender对象中操作
             calendar.add(Calendar.DATE, 1);//把日期往后增加n天.正数往后推,负数往前移动
+
             int timeNum = calendar.getTime().compareTo(new Date());
             if (timeNum < 1) {
                 order.setStatus("6");

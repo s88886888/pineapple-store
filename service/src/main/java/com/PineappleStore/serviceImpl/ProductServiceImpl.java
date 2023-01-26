@@ -296,8 +296,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
 
         if (SelectByIdForBoolean(product.getProductId())) {
+            product.setUpdateTime(new Date());
             ProductMapper.updateById(product);
-            return new ResultVo("更新成功", StatusVo.success, null);
+            return new ResultVo("更新成功", StatusVo.success, product);
         } else {
             return new ResultVo("更新失败，该商品不存在", StatusVo.Error, null);
         }

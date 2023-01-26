@@ -8,5 +8,7 @@ import java.util.List;
 public class imgVo {
 
     private String itemId;
+
+    private Integer del;
     private List<ProductImg> imgList;
 }

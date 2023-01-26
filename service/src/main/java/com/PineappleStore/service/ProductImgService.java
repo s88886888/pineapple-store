@@ -23,6 +23,8 @@ public interface ProductImgService extends IService<ProductImg> {
 
     ResultVo UpdateByModel(ProductImg ProductImg);
 
+    ResultVo UpdateByUrl(ProductImg ProductImg);
+
     ResultVo DeleteById(String Id);
 
     ResultVo AddModel(ProductImg ProductImg);

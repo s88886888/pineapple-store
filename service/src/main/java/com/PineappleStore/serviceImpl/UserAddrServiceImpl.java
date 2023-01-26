@@ -63,6 +63,10 @@ public class UserAddrServiceImpl extends ServiceImpl<UserAddrMapper, UserAddr> i
 
 
         userAddr.setAddrId(String.valueOf(UUID.randomUUID()));
+
+        if (userAddr.getArea() == null) {
+            userAddr.setArea("香港区");
+        }
         userAddr.setCreateTime(new Date());
         userAddr.setUpdateTime(new Date());
         int i = userAddrMapper.insert(userAddr);

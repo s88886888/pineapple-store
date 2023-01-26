@@ -49,6 +49,13 @@ public class ProductImgController {
         return productImgService.UpdateByModel(productImg);
     }
 
+    @PutMapping("/updateUrl")
+    @ApiOperation(value = "更改图片", notes = "提交model进行更新")
+    public ResultVo UpdateByUrl(@RequestBody ProductImg productImg) {
+
+        return productImgService.UpdateByUrl(productImg);
+    }
+
     @DeleteMapping("/{id}")
     @ApiOperation(value = "根据一条id进行删除数据", notes = "传入单id")
     public ResultVo DeleteById(@PathVariable String id) {

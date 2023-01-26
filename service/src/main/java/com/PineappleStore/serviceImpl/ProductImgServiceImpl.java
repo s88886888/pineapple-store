@@ -6,6 +6,7 @@ import com.PineappleStore.dao.ProductImgMapper;
 import com.PineappleStore.entity.ProductImg;
 import com.PineappleStore.entity.imgVo;
 import com.PineappleStore.service.ProductImgService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,15 +68,17 @@ public class ProductImgServiceImpl extends ServiceImpl<ProductImgMapper, Product
     @Override
     public ResultVo AddModelList(imgVo list) {
 
-        for (int i = 0; i < list.getImgList().size(); i++) {
-            list.getImgList().get(i).setId(String.valueOf(UUID.randomUUID()));
-            list.getImgList().get(i).setIsMain(0);
-            list.getImgList().get(i).setItemId(list.getItemId());
-            list.getImgList().get(i).setCreatedTime(new Date());
-            list.getImgList().get(i).setUpdatedTime(new Date());
-            productImgMapper.insert(list.getImgList().get(i));
+        for (ProductImg item : list.getImgList()) {
+
+            item.setId(String.valueOf(UUID.randomUUID()));
+            item.setIsMain(0);
+            item.setItemId(list.getItemId());
+            item.setCreatedTime(new Date());
+            item.setUpdatedTime(new Date());
+            productImgMapper.insert(item);
+
         }
-        return new ResultVo("增加商品图片列表成功", StatusVo.success, null);
+        return new ResultVo("商品列表数据变更成功", StatusVo.success, null);
     }
 
 
@@ -136,6 +139,27 @@ public class ProductImgServiceImpl extends ServiceImpl<ProductImgMapper, Product
         } else {
             return new ResultVo("增加失败：不允许设置两张图片", StatusVo.Error, null);
         }
+    }
+
+    @Override
+    public ResultVo UpdateByUrl(ProductImg productImg) {
+        LambdaQueryWrapper<ProductImg> wrapper = new LambdaQueryWrapper<ProductImg>()
+                .eq(ProductImg::getIsMain, 1)
+                .eq(ProductImg::getItemId, productImg.getItemId());
+
+        ProductImg data = productImgMapper.selectOne(wrapper);
+
+        if (data == null) {
+            return new ResultVo("更新失败：找不到该商品", StatusVo.Error, null);
+        }
+
+
+        data.setUrl(productImg.getUrl());
+
+
+        productImgMapper.updateById(data);
+
+        return new ResultVo("更新成功", StatusVo.success, null);
     }
 
 }

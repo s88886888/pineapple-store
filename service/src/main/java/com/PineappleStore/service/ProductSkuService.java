@@ -22,6 +22,10 @@ public interface ProductSkuService extends IService<ProductSku> {
 
     ResultVo SelectById(String Id);
 
+
+    ResultVo SelectByProductId(String Id);
+
+
     ResultVo UpdateByModel(ProductSku productSku);
 
     ResultVo UpdateStock(ProductSku productSku);
@@ -31,6 +35,7 @@ public interface ProductSkuService extends IService<ProductSku> {
     ResultVo AddModel(ProductSku productSku);
 
     ResultVo AddModelList(skuVo skuvo);
+
 
     ResultVo Delete(String Id);
 

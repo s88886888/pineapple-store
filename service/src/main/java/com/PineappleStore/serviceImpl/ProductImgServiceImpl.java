@@ -68,16 +68,16 @@ public class ProductImgServiceImpl extends ServiceImpl<ProductImgMapper, Product
     @Override
     public ResultVo AddModelList(imgVo list) {
 
-        for (ProductImg item : list.getImgList()) {
 
+        for (ProductImg item : list.getImgList()) {
             item.setId(String.valueOf(UUID.randomUUID()));
             item.setIsMain(0);
             item.setItemId(list.getItemId());
             item.setCreatedTime(new Date());
             item.setUpdatedTime(new Date());
             productImgMapper.insert(item);
-
         }
+
         return new ResultVo("商品列表数据变更成功", StatusVo.success, null);
     }
 

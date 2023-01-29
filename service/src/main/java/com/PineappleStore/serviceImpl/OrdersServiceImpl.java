@@ -179,7 +179,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 orderItem.setOrderId(ordersVo.getOrderId());
 
                 MPJLambdaWrapper<Product> wrapper = new MPJLambdaWrapper<Product>()
-                        .select(Product::getProductName)
+                        .select(Product::getProductName, Product::getProductId, Product::getSoldNum)
                         .select(ProductImg::getUrl)
                         .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuId, ProductSku::getSkuName)
                         .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
@@ -192,8 +192,8 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
 
                 Product product = new Product();
-                product.setProductId(selectJoinOne.getProductId());
                 product.setSoldNum(selectJoinOne.getSoldNum() + ordersVo.getProductList().get(i).getCartNum());
+                product.setUpdateTime(new Date());
                 productMapper.updateById(product);
 
 
@@ -258,7 +258,8 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 return new ResultVo("结算失败：请检查库存", StatusVo.Error, null);
             }
         } catch (Exception e) {
-            return new ResultVo("结算遭遇异常，请您不要担心系统已启用：数据回滚,不会对您的账号有任何影响。如有问题请联系管理员Linson！", StatusVo.Error, null);
+            System.out.println(e.getMessage());
+            return new ResultVo("结算遭遇异常，请您不要担心系统已启用：数据回滚,不会对您的账号有任何影响。如有问题请联系管理员Linson！", StatusVo.Error, e);
         }
     }
 

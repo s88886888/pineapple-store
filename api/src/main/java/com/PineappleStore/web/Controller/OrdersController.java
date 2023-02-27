@@ -61,6 +61,13 @@ public class OrdersController {
     }
 
 
+    @GetMapping("/getUserIdbyStatus")
+    @ApiOperation(value = "分页获取用户订单", notes = "根据用户ID获取一条数据")
+    public ResultVo SelectByUserId(String Id,String status) {
+        return ordersService.SelectByUserIdNopay(Id,status);
+    }
+
+
     @GetMapping("/getOrderitem/{id}")
     @ApiOperation(value = "根据ID嵌套查询item", notes = "根据ID嵌套查询item")
     public ResultVo SelectOrederItem(@PathVariable String id) {

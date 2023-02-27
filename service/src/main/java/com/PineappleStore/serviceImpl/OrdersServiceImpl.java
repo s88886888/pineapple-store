@@ -138,6 +138,26 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
     @Override
+    public ResultVo SelectByUserIdNopay(String Id,String status) {
+
+
+        MPJLambdaWrapper<Orders> wrapper = new MPJLambdaWrapper<Orders>()
+                .selectAll(Orders.class)
+                //嵌套查询
+                .selectCollection(OrderItem.class, OrdersVo::getProductList)
+                .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
+                .leftJoin(ProductImg.class, ProductImg::getItemId, OrderItem::getProductId)
+                .eq(Orders::getUserId, Id)
+                .eq(Orders::getStatus,status)
+                .orderByDesc(Orders::getCreateTime);
+
+        List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, wrapper);
+
+
+        return new ResultVo("查询成功", StatusVo.success, orders);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public ResultVo AddModel(OrdersVo ordersVo) {
 

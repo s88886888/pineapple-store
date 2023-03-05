@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * <p>
@@ -62,9 +63,9 @@ public class OrdersController {
 
 
     @GetMapping("/getUserIdbyStatus")
-    @ApiOperation(value = "分页获取用户订单", notes = "根据用户ID获取一条数据")
-    public ResultVo SelectByUserId(String Id,String status) {
-        return ordersService.SelectByUserIdNopay(Id,status);
+    @ApiOperation(value = "状态获取用户订单", notes = "状态获取用户订单")
+    public ResultVo SelectByUserId(@RequestParam String Id, @RequestParam String status) {
+        return ordersService.SelectByUserIdNopay(Id, status);
     }
 
 
@@ -132,6 +133,18 @@ public class OrdersController {
 
 
     }
+
+
+    @ApiOperation(value = "推送发货", notes = "推送发货")
+    @PutMapping("/seedOrder")
+    public ResultVo seedOreder(@RequestBody List<Orders> orders) throws Exception {
+
+
+        return ordersService.seedOrder(orders);
+
+
+    }
+
 
 }
 

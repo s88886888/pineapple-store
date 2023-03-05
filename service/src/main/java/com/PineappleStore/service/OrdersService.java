@@ -6,6 +6,7 @@ import com.PineappleStore.entity.OrdersVo;
 import com.github.yulichang.base.MPJBaseService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * <p>
@@ -45,7 +46,7 @@ public interface OrdersService extends MPJBaseService<Orders> {
 
     ResultVo aliPayNotify(HttpServletRequest request) throws Exception;
 
-    void ChenckTimeoutOrder();
+    ResultVo seedOrder(List<Orders> orders) throws Exception;
 
 
 }

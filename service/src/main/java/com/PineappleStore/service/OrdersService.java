@@ -34,6 +34,9 @@ public interface OrdersService extends MPJBaseService<Orders> {
     ResultVo UpdateByModel(Orders orders);
 
 
+    ResultVo UpdateUserOff(String ordersId,String UserId);
+
+
     ResultVo DeleteById(String Id);
 
     ResultVo AddModel(OrdersVo orders);

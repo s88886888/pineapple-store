@@ -5,6 +5,7 @@ import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.Orders;
 import com.PineappleStore.entity.OrdersVo;
 import com.PineappleStore.service.OrdersService;
+import com.sun.org.apache.regexp.internal.RE;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,13 @@ public class OrdersController {
     @ApiOperation(value = "更新数据", notes = "提交model进行更新")
     public ResultVo UpdateByModel(@RequestBody Orders orders) {
         return ordersService.UpdateByModel(orders);
+    }
+
+
+    @PutMapping("/UpdateUserOff")
+    @ApiOperation(value = "用户手动取消订单", notes = "用户手动取消订单")
+    public ResultVo UpdateUserOff(@RequestParam String OrderID , @RequestParam String UserId) {
+        return ordersService.UpdateUserOff(OrderID,UserId);
     }
 
     @DeleteMapping("/{id}")

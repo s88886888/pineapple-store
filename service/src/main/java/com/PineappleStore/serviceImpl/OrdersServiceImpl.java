@@ -137,7 +137,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
     @Override
-    public ResultVo SelectByUserIdNopay(String Id,String status) {
+    public ResultVo SelectByUserIdNopay(String Id, String status) {
 
 
         MPJLambdaWrapper<Orders> wrapper = new MPJLambdaWrapper<Orders>()
@@ -147,7 +147,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 .leftJoin(OrderItem.class, OrderItem::getOrderId, Orders::getOrderId)
                 .leftJoin(ProductImg.class, ProductImg::getItemId, OrderItem::getProductId)
                 .eq(Orders::getUserId, Id)
-                .eq(Orders::getStatus,status)
+                .eq(Orders::getStatus, status)
                 .orderByDesc(Orders::getCreateTime);
 
         List<OrdersVo> orders = ordersMapper.selectJoinList(OrdersVo.class, wrapper);
@@ -348,6 +348,31 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         } else {
             return new ResultVo("更新失败，该轮播图不存在", StatusVo.Error, null);
         }
+
+    }
+
+    @Override
+    public ResultVo UpdateUserOff(String ordersId, String UserId) {
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<Orders>()
+                .select(Orders::getOrderId, Orders::getStatus)
+                .eq(Orders::getOrderId, ordersId)
+                .eq(Orders::getUserId, UserId);
+
+        Orders data = ordersMapper.selectOne(wrapper);
+
+        if (data != null) {
+            if (data.getStatus().equals("1")) {
+                data.setStatus("6");
+                data.setCloseType(4);
+                ordersMapper.updateById(data);
+                return new ResultVo("取消订单成功", StatusVo.success, null);
+            } else {
+                return new ResultVo("订单状态异常", StatusVo.Error, null);
+            }
+        } else {
+            return new ResultVo("法非订单", StatusVo.Error, null);
+        }
+
 
     }
 

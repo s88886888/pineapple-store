@@ -209,6 +209,11 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
                 ProductVo selectJoinOne = productMapper.selectJoinOne(ProductVo.class, wrapper);
 
+                if (selectJoinOne == null) {
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                    return new ResultVo("非法账户:联系管理员解除限制", StatusVo.Error, null);
+                }
+
 
                 Product product = new Product();
                 product.setSoldNum(selectJoinOne.getSoldNum() + ordersVo.getProductList().get(i).getCartNum());

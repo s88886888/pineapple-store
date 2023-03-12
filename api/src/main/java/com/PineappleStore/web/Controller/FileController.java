@@ -3,56 +3,58 @@ package com.PineappleStore.web.Controller;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import io.swagger.annotations.Api;
-import org.springframework.boot.system.ApplicationHome;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
 @Api(value = "图片上传", tags = "图片上传")
 public class FileController {
 
+    //文件路径
+    @Value("${filePath}")
+    private String filePath;
+
 
     @PostMapping(value = "/upload")
     @ResponseBody
-    public ResultVo upload(@RequestParam MultipartFile file, HttpServletRequest req) {
+    public ResultVo upload(@RequestParam MultipartFile file) {
 
 
         if (file.isEmpty()) {
-            return new ResultVo("图片为空", StatusVo.Error, null);
+            return new ResultVo("上传文件不可以为空", StatusVo.Error, null);
+        }
+        //判断文件类型
+        String fileType = file.getContentType();
+
+        assert fileType != null;
+        if (!fileType.split("/")[0].equals("image")) {
+            return new ResultVo("文件不是图片类型，上传失败", StatusVo.Error, null);
         }
 
+        //获取文件的后缀
+        String fileSuffix = Objects.requireNonNull(file.getOriginalFilename()).substring(file.getOriginalFilename().lastIndexOf("."));
+        //随机生成文件名称
+        UUID uuid = UUID.randomUUID();
 
-        String fileName = file.getOriginalFilename();
-        String imgName = "." + fileName.split("\\.")[fileName.split("\\.").length - 1];
-
-
-        String uuid = UUID.randomUUID().toString().replace("-", "");
-        String newFileName = uuid + imgName;
-
-
-        ApplicationHome applicationHome = new ApplicationHome(this.getClass());
-
-        String pre = applicationHome.getDir().getParentFile().getParentFile()
-                .getAbsolutePath() + "\\src\\main\\resources\\imgs\\";
-
-
-        String path = pre + newFileName;
 
         try {
-            file.transferTo(new File(path));
+            //路径+文件名+文件后缀
+            file.transferTo(new File(filePath + uuid + fileSuffix));
+
         } catch (IOException | IllegalStateException e) {
             throw new RuntimeException(e);
         }
-        String serverFilePath = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + "/imgs/" + newFileName;
-        return new ResultVo("图片上传成功", StatusVo.success, serverFilePath);
+
+        return new ResultVo("图片上传成功", StatusVo.success, "http://121.4.154.210:8081/image/" + uuid + fileSuffix);
 
     }
 

@@ -49,11 +49,12 @@ public class FileController {
         try {
             //路径+文件名+文件后缀
             file.transferTo(new File(filePath + uuid + fileSuffix));
+
         } catch (IOException | IllegalStateException e) {
             throw new RuntimeException(e);
         }
 
-        return new ResultVo("图片上传成功", StatusVo.success, filePath + uuid + fileType);
+        return new ResultVo("图片上传成功", StatusVo.success, "http://121.4.154.210:8081/image/" + uuid + fileSuffix);
 
     }
 

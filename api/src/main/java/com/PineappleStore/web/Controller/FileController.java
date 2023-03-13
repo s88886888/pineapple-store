@@ -3,11 +3,9 @@ package com.PineappleStore.web.Controller;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import io.swagger.annotations.Api;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -16,6 +14,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/upload")
 @Api(value = "图片上传", tags = "图片上传")
 public class FileController {
 
@@ -24,9 +23,9 @@ public class FileController {
     private String filePath;
 
 
-    @PostMapping(value = "/upload")
+    @PostMapping("/")
     @ResponseBody
-    public ResultVo upload(@RequestParam MultipartFile file) {
+    public ResultVo upload(@NotNull @RequestParam MultipartFile file) {
 
 
         if (file.isEmpty()) {

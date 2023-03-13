@@ -21,7 +21,7 @@ public interface ProductService extends IService<Product> {
 
     ResultVo SelectImgListById(String Id);
 
-    ResultVo selectByItemid(int Id);
+    ResultVo selectByItemid(String Id);
 
     ResultVo SelectByAllForProductImgAndProductSku(int current, int size);
 

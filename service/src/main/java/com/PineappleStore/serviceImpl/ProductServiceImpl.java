@@ -401,7 +401,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
-    public ResultVo selectByItemid(int Id) {
+    public ResultVo selectByItemid(String Id) {
         MPJLambdaWrapper<Product> mpjLambdaWrapper = new MPJLambdaWrapper<Product>()
                 .selectAll(Product.class)
                 .selectCollection(ProductImg.class, ProductVo::getImgList)

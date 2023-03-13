@@ -50,7 +50,7 @@ public class ProductController {
 
     @GetMapping("/List/{id}")
     @ApiOperation(value = "根据商品ID获取所有图片库存信息", notes = "根据商品表的一个ID获取所有关联子表的图片")
-    public ResultVo SelectByItemid(@PathVariable int id) {
+    public ResultVo SelectByItemid(@PathVariable String id) {
         return productService.selectByItemid(id);
     }
 

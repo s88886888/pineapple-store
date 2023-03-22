@@ -19,8 +19,11 @@ import java.util.UUID;
 public class FileController {
 
     //文件路径
-    @Value("${filePath}")
+    @Value(value = "${filePath}")
     private String filePath;
+
+    @Value(value = "${localHostUrl}")
+    private String localHostUrl;
 
 
     @PostMapping("/")
@@ -53,7 +56,7 @@ public class FileController {
             throw new RuntimeException(e);
         }
 
-        return new ResultVo("图片上传成功", StatusVo.success, "http://121.4.154.210:8081/image/" + uuid + fileSuffix);
+        return new ResultVo("图片上传成功", StatusVo.success, localHostUrl + uuid + fileSuffix);
 
     }
 

@@ -52,4 +52,7 @@ public interface OrdersService extends MPJBaseService<Orders> {
     ResultVo seedOrder(List<Orders> orders) throws Exception;
 
 
+    ResultVo confirmReceipt(String orderId,Integer userId);
+
+
 }

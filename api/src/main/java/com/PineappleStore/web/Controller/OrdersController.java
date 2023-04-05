@@ -122,6 +122,13 @@ public class OrdersController {
 
     }
 
+    @ApiOperation(value = "用户收货", notes = "用户收货")
+    @PostMapping("/confirmReceipt")
+    public ResultVo confirmReceipt(@RequestParam String orderId,@RequestParam Integer userId) {
+        return ordersService.confirmReceipt(orderId,userId);
+
+    }
+
 
 }
 

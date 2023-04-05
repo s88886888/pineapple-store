@@ -501,5 +501,29 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         return new ResultVo("推送仓库,并且发货成功,本次发送数量:" + count, 200, list);
     }
 
+    @Override
+    public ResultVo confirmReceipt(String orderId,Integer userId) {
+
+        MPJLambdaWrapper<Orders> dataWrapper =new MPJLambdaWrapper<Orders>()
+                .selectAll(Orders.class)
+                .eq(Orders::getOrderId,orderId)
+                .eq(Orders::getUserId,userId);
+
+        Orders orders =   ordersMapper.selectOne(dataWrapper);
+
+
+        if (orders==null)
+        {
+            return new ResultVo("用户不存在该订单",StatusVo.Error,null);
+        }
+        else
+        {
+            orders.setStatus("5");
+             ordersMapper.updateById(orders);
+            return new ResultVo("成功确认收货",StatusVo.success,null);
+        }
+//        return new ResultVo("系统错误，联系管理员",StatusVo.Error,null);
+    }
+
 
 }

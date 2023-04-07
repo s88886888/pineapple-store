@@ -1,5 +1,6 @@
 package com.PineappleStore.serviceImpl;
 
+import com.PineappleStore.RedisService.RedisUtil;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.CategoryMapper;
@@ -15,6 +16,7 @@ import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,17 +37,27 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Autowired
     private ProductMapper productMapper;
 
+    @Resource
+    private RedisUtil redisUtil;
+
 
     @Override
     public ResultVo SelectByAll() {
 
-        //定义一个规则集合
-        QueryWrapper<Category> wrapper = new QueryWrapper<>();
+        if (redisUtil.hasKey("CategoryList")) {
 
-        //"sql "
-        List<Category> categoryList = categoryMapper.selectList(wrapper);
+            return new ResultVo("查询成功", StatusVo.success, redisUtil.get("CategoryList"));
+        } else {
+            //定义一个规则集合
+            QueryWrapper<Category> wrapper = new QueryWrapper<>();
 
-        return new ResultVo("查询成功", StatusVo.success, categoryList);
+            //"sql "
+            List<Category> categoryList = categoryMapper.selectList(wrapper);
+
+            redisUtil.set("CategoryList", categoryList);
+            return new ResultVo("查询成功", StatusVo.success, categoryList);
+        }
+
 
     }
 
@@ -228,9 +240,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             for (Category datum : data) {
                 if (Objects.equals(datum.getCategoryId(), category.getCategoryId())) {
                     categoryMapper.updateById(category);
+
+                    redisUtil.del("CategoryList");
+                    redisUtil.del("SelectByParent");
+                    redisUtil.del("CategoryStar");
+
                     return new ResultVo("更新成功", StatusVo.success, null);
                 }
             }
+
         }
         if (category.getCategoryStar() == 2) {
 
@@ -241,12 +259,19 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 return new ResultVo("更新失败，请先取消其他模块【菠萝推荐】", StatusVo.Error, null);
             } else {
                 categoryMapper.updateById(category);
+
+                redisUtil.del("CategoryList");
+                redisUtil.del("SelectByParent");
+                redisUtil.del("CategoryStar");
                 return new ResultVo("更新成功", StatusVo.success, null);
             }
 
         } else {
             if (SelectByIdForBoolean(category.getCategoryId())) {
                 categoryMapper.updateById(category);
+                redisUtil.del("CategoryList");
+                redisUtil.del("SelectByParent");
+                redisUtil.del("CategoryStar");
                 return new ResultVo("更新成功", StatusVo.success, null);
             } else {
                 return new ResultVo("更新失败，该分类不存在", StatusVo.Error, null);
@@ -274,30 +299,37 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     public ResultVo SelectByParent() {
 
         //复合查询先拿出 star==3 的id
-        QueryWrapper<Category> wrapper = new QueryWrapper<>();
-        wrapper.lambda().select(Category::getCategoryId).eq(Category::getCategoryStar, 3);
-        Category categoryId = categoryMapper.selectOne(wrapper);
 
-        if (categoryId == null) {
-            return new ResultVo("请求失败：管理员未设置商品信息", StatusVo.success, null);
+        if (redisUtil.hasKey("SelectByParent")) {
+
+            return new ResultVo("请求成功", StatusVo.success, redisUtil.get("SelectByParent"));
+        } else {
+            QueryWrapper<Category> wrapper = new QueryWrapper<>();
+            wrapper.lambda().select(Category::getCategoryId).eq(Category::getCategoryStar, 3);
+            Category categoryId = categoryMapper.selectOne(wrapper);
+
+            if (categoryId == null) {
+                return new ResultVo("请求失败：管理员未设置商品信息", StatusVo.success, null);
+            }
+
+            MPJLambdaWrapper<Category> data = new MPJLambdaWrapper<Category>()
+                    .selectAll(Category.class)
+                    .selectCollection(Product.class, CategoryVO::getProductList, map -> map
+                            .collection(ProductImg.class, ProductListVo::getImgList)
+                            .collection(ProductSku.class, ProductListVo::getSkuList))
+
+                    .leftJoin(Product.class, Product::getCategoryId, Category::getCategoryId)
+                    .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
+                    .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
+                    .eq(ProductImg::getIsMain, 1)
+                    .eq(Category::getParentId, categoryId.getCategoryId());
+
+            List<CategoryVO> category = categoryMapper.selectJoinList(CategoryVO.class, data);
+
+            redisUtil.set("SelectByParent", category);
+
+            return new ResultVo("请求成功", StatusVo.success, category);
         }
-
-        MPJLambdaWrapper<Category> data = new MPJLambdaWrapper<Category>()
-                .selectAll(Category.class)
-                .selectCollection(Product.class, CategoryVO::getProductList, map -> map
-                        .collection(ProductImg.class, ProductListVo::getImgList)
-                        .collection(ProductSku.class, ProductListVo::getSkuList))
-
-                .leftJoin(Product.class, Product::getCategoryId, Category::getCategoryId)
-                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId)
-                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId)
-                .eq(ProductImg::getIsMain, 1)
-                .eq(Category::getParentId, categoryId.getCategoryId());
-
-        List<CategoryVO> category = categoryMapper.selectJoinList(CategoryVO.class, data);
-
-
-        return new ResultVo("请求成功", StatusVo.success, category);
 
 
     }

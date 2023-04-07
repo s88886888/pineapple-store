@@ -1,5 +1,6 @@
 package com.PineappleStore.serviceImpl;
 
+import com.PineappleStore.RedisService.RedisUtil;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.IndexImgMapper;
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -29,13 +31,24 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
     @Autowired
     private IndexImgMapper indexImgMapper;
 
+    @Resource
+    private RedisUtil redisUtil;
 
     @Override
     public ResultVo SelectByAll() {
-        QueryWrapper<IndexImg> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(IndexImg::getStatus, 1);
-        List<IndexImg> IndexImgList = indexImgMapper.selectList(wrapper);
-        return new ResultVo("查询成功", StatusVo.success, IndexImgList);
+
+        if (redisUtil.hasKey("indexImg")) {
+            return new ResultVo("查询成功", StatusVo.success, redisUtil.get("indexImg"));
+        } else {
+            QueryWrapper<IndexImg> wrapper = new QueryWrapper<>();
+            wrapper.lambda().eq(IndexImg::getStatus, 1);
+            List<IndexImg> IndexImgList = indexImgMapper.selectList(wrapper);
+            redisUtil.set("indexImg", IndexImgList, 60 * 60 * 24);
+
+            return new ResultVo("查询成功", StatusVo.success, IndexImgList);
+        }
+
+
     }
 
     @Override
@@ -80,6 +93,10 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
 
             if (i > 0) {
 
+                if (redisUtil.hasKey("indexImg")) {
+                    redisUtil.del("indexImg");
+                }
+
                 return new ResultVo("增加成功", StatusVo.success, null);
             } else {
                 return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
@@ -107,6 +124,9 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
         if (checkModel) {
             int category = indexImgMapper.deleteById(Id);
             if (category > 0) {
+                if (redisUtil.hasKey("indexImg")) {
+                    redisUtil.del("indexImg");
+                }
                 return new ResultVo("删除成功", StatusVo.success, null);
             } else {
                 return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, null);
@@ -124,6 +144,9 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
         if (SelectByIdForBoolean(indexImg.getImgId())) {
             indexImg.setUpdateTime(new Date());
             indexImgMapper.updateById(indexImg);
+            if (redisUtil.hasKey("indexImg")) {
+                redisUtil.del("indexImg");
+            }
             return new ResultVo("更新成功", StatusVo.success, null);
         } else {
             return new ResultVo("更新失败，该轮播图不存在", StatusVo.Error, null);
@@ -146,6 +169,10 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
 
 
             indexImgMapper.updateById(data);
+            if (redisUtil.hasKey("indexImg"))
+            {
+                redisUtil.del("indexImg");
+            }
             return new ResultVo("更新成功", StatusVo.success, null);
         } else {
             return new ResultVo("更新失败，该轮播图不存在", StatusVo.Error, null);
@@ -167,14 +194,14 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
     }
 
 
-    //就是不改int类型你能怎么样
-    public Long SelectCout() {
-        QueryWrapper<IndexImg> wrapper = new QueryWrapper<>();
-
-
-        Long num = indexImgMapper.selectCount(wrapper);
-
-        return num + 1;
-    }
+//    //就是不改int类型你能怎么样
+//    public Long SelectCout() {
+//        QueryWrapper<IndexImg> wrapper = new QueryWrapper<>();
+//
+//
+//        Long num = indexImgMapper.selectCount(wrapper);
+//
+//        return num + 1;
+//    }
 
 }

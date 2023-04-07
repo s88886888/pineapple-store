@@ -1,6 +1,7 @@
 package com.PineappleStore.web.Controller;
 
 
+import com.PineappleStore.RedisService.RedisUtil;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.Product;
 import com.PineappleStore.service.ProductService;
@@ -8,6 +9,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 /**
  * <p>
@@ -22,8 +25,9 @@ import org.springframework.web.bind.annotation.*;
 @Api(value = "商品", tags = "商品信息")
 public class ProductController {
 
-    @Autowired
+    @Resource
     private ProductService productService;
+
 
 
     @GetMapping("/List")

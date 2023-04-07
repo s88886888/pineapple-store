@@ -1,6 +1,7 @@
 package com.PineappleStore.serviceImpl;
 
 
+import com.PineappleStore.RedisService.RedisUtil;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.ProductMapper;
@@ -15,6 +16,7 @@ import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -34,6 +36,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Autowired
     private ProductMapper ProductMapper;
+
+    @Resource
+    private RedisUtil redisUtil;
 
 
     @Override
@@ -98,6 +103,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1);
         IPage<ProductVo> data = ProductMapper.selectJoinPage(new Page<>(current, size), ProductVo.class, wrapper);
         return new ResultVo("查询成功", StatusVo.success, data);
+
     }
 
 
@@ -143,19 +149,26 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     //关联商品分类等级是1 的商品
     @Override
     public ResultVo SelectByCategoryStar(int star) {
-        List<ProductVo> product = ProductMapper.selectJoinList(ProductVo.class, new MPJLambdaWrapper<Product>()
-                .selectAll(Product.class)
-                .selectAll(ProductImg.class)
-                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
-                .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId).eq(Product::getProductPreferred, 1)
-                .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
-                .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1)
-                .eq(Category::getCategoryStar, star)
-        );
 
 
-        return new ResultVo("查询成功", StatusVo.success, product);
-
+        if (redisUtil.hasKey("CategoryStar"))
+        {
+            return new ResultVo("查询成功", StatusVo.success, redisUtil.get("CategoryStar"));
+        }
+        else
+        {
+            List<ProductVo> product = ProductMapper.selectJoinList(ProductVo.class, new MPJLambdaWrapper<Product>()
+                    .selectAll(Product.class)
+                    .selectAll(ProductImg.class)
+                    .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts)
+                    .leftJoin(Category.class, Category::getCategoryId, Product::getCategoryId).eq(Product::getProductPreferred, 1)
+                    .leftJoin(ProductImg.class, ProductImg::getItemId, Product::getProductId).eq(ProductImg::getIsMain, 1)
+                    .leftJoin(ProductSku.class, ProductSku::getProductId, Product::getProductId).eq(ProductSku::getSkuStar, 1)
+                    .eq(Category::getCategoryStar, star)
+            );
+            redisUtil.set("CategoryStar",product);
+            return new ResultVo("查询成功", StatusVo.success, product);
+        }
     }
 
     @Override
@@ -238,6 +251,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             product.setUpdateTime(new Date());
             int i = ProductMapper.insert(product);
             if (i > 0) {
+                redisUtil.del("CategoryStar");
+                redisUtil.del("SelectByParent");
                 return new ResultVo("增加成功", StatusVo.success, product);
             } else {
                 return new ResultVo("增加失败：请联系管理员", StatusVo.Error, null);
@@ -319,7 +334,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             }
 
             ProductMapper.updateById(data);
-
+            redisUtil.del("CategoryStar");
+            redisUtil.del("SelectByParent");
             return new ResultVo("更新成功", StatusVo.success, null);
         } else {
             return new ResultVo("更新失败，该商品不存在", StatusVo.Error, null);
@@ -349,6 +365,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 }
             }
             ProductMapper.updateById(data);
+            redisUtil.del("CategoryStar");
+            redisUtil.del("SelectByParent");
             return new ResultVo("更新成功", StatusVo.success, null);
         }
 
@@ -356,6 +374,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
 
     @Override
+    //qwq
     public ResultVo UpdateStar(Product product) {
 
         Product data = ProductMapper.selectOne(new LambdaQueryWrapper<Product>()
@@ -379,6 +398,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 }
             }
             ProductMapper.updateById(data);
+            redisUtil.del("CategoryStar");
+            redisUtil.del("SelectByParent");
             return new ResultVo("更新成功", StatusVo.success, null);
         }
     }

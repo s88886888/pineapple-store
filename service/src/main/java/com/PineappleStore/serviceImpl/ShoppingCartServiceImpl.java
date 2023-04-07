@@ -1,17 +1,20 @@
 package com.PineappleStore.serviceImpl;
 
 
+import com.PineappleStore.RedisService.RedisUtil;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.dao.ShoppingCartMapper;
 import com.PineappleStore.entity.*;
 import com.PineappleStore.service.ShoppingCartService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +34,10 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     private ShoppingCartMapper shoppingCartMapper;
 
 
+    @Resource
+    private RedisUtil redisUtil;
+
+
     @Override
     public ResultVo SelectByAll() {
         QueryWrapper<ShoppingCart> wrapper = new QueryWrapper<>();
@@ -47,19 +54,28 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Override
     public ResultVo SelectByUserid(String Id) {
 
+        if (redisUtil.hasKey(Id)) {
+            return new ResultVo("查询成功", StatusVo.success, redisUtil.get(Id));
+        } else {
 
-        List<ShoppingCartVo> ShoppingCartVo = shoppingCartMapper.selectJoinList(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCart>()
-                .select(Product::getProductName, Product::getCategoryId)
-                .select(ProductImg::getUrl).eq(ProductImg::getIsMain, 1)
-                .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuName)
-                .selectAll(ShoppingCart.class)
-                .leftJoin(Product.class, Product::getProductId, ShoppingCart::getProductId)
-                .leftJoin(ProductImg.class, ProductImg::getItemId, ShoppingCart::getProductId)
-                .leftJoin(ProductSku.class, ProductSku::getSkuId, ShoppingCart::getSkuId)
-                .eq(ShoppingCart::getUserId, Id)
-        );
+            List<ShoppingCartVo> ShoppingCartVo = shoppingCartMapper.selectJoinList(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCart>()
+                    .select(Product::getProductName, Product::getCategoryId)
+                    .select(ProductImg::getUrl).eq(ProductImg::getIsMain, 1)
+                    .select(ProductSku::getOriginalPrice, ProductSku::getDiscounts, ProductSku::getSkuName)
+                    .selectAll(ShoppingCart.class)
+                    .leftJoin(Product.class, Product::getProductId, ShoppingCart::getProductId)
+                    .leftJoin(ProductImg.class, ProductImg::getItemId, ShoppingCart::getProductId)
+                    .leftJoin(ProductSku.class, ProductSku::getSkuId, ShoppingCart::getSkuId)
+                    .eq(ShoppingCart::getUserId, Id)
+            );
 
-        return new ResultVo("查询成功", StatusVo.success, ShoppingCartVo);
+            if (ShoppingCartVo.size() > 0) {
+                redisUtil.set(String.valueOf(ShoppingCartVo.get(0).getUserId()), ShoppingCartVo, 60 * 5);
+            }
+
+            return new ResultVo("查询成功", StatusVo.success, ShoppingCartVo);
+        }
+
 
     }
 
@@ -106,7 +122,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
             }
             shoppingCart.setCartNum(String.valueOf(cartNum + 1));
 
-
+            redisUtil.del(String.valueOf(shoppingCartOne.getUserId()));
             return UpdateByModel(shoppingCart);
 
         } else {
@@ -128,6 +144,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
 
 
             if (i > 0) {
+                redisUtil.del(String.valueOf(data.getUserId()));
                 return new ResultVo("添加购物车成功", StatusVo.success, data);
 
             } else {
@@ -146,13 +163,25 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Override
     public ResultVo DeleteById(int Id) {
 
-        if (SelectByIdForBoolean(Id)) {
+
+        LambdaQueryWrapper<ShoppingCart> wrapper = new LambdaQueryWrapper<ShoppingCart>()
+                .select(ShoppingCart::getCartId, ShoppingCart::getUserId);
+
+        ShoppingCart data = shoppingCartMapper.selectById(wrapper);
+
+        if (data != null) {
+
+
             int category = shoppingCartMapper.deleteById(Id);
             if (category > 0) {
+                if (redisUtil.hasKey(String.valueOf(data.getUserId()))) {
+                    redisUtil.del(String.valueOf(data.getUserId()));
+                }
                 return new ResultVo("删除成功", StatusVo.success, null);
             } else {
                 return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, null);
             }
+
         } else {
             return new ResultVo("删除失败：该数据不存在", StatusVo.Error, null);
         }
@@ -165,7 +194,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         if (SelectByIdForBoolean(shoppingCart.getCartId())) {
 
             shoppingCartMapper.updateById(shoppingCart);
-
+            redisUtil.del(String.valueOf(shoppingCart.getUserId()));
             return new ResultVo("修改购物成功", StatusVo.created, shoppingCart);
         } else {
             return new ResultVo("更新失败，该数据不存在", StatusVo.Error, null);

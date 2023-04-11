@@ -147,6 +147,13 @@ public class OrdersController {
 
     }
 
+    @ApiOperation(value = "申请退货逻辑", notes = "申请退货逻辑")
+    @GetMapping("/returnOrderUsert/{OrderId}")
+    public ResultVo returnOrderUsert(@PathVariable String OrderId) {
+        return ordersService.returnOrderUser(OrderId);
+
+    }
+
 
 
 }

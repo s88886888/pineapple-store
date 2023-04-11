@@ -57,5 +57,7 @@ public interface OrdersService extends MPJBaseService<Orders> {
     ResultVo  returnOrder(List<Orders> list);
     ResultVo  getReturnDesc(String orderId);
 
+    ResultVo  returnOrderUser(String orderId);
+
 
 }

@@ -17,7 +17,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.query.MPJLambdaQueryWrapper;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
-import org.apache.ibatis.ognl.enhance.OrderedReturn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -554,7 +553,38 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 .eq(OrderReturn::getOrderId,orderId);
 
           OrderReturn data =   orderReturnMapper.selectOne(wrapper);
-        return new ResultVo("查询成功" , StatusVo.success, null);
+        return new ResultVo("查询成功" , StatusVo.success, data);
+    }
+
+    @Override
+    public ResultVo returnOrderUser(String orderId) {
+
+
+
+        Orders data=  ordersMapper.selectById(orderId);
+
+        if (data!=null)
+        {
+
+            if ("2".equals(data.getStatus()))
+            {
+                data.setStatus("7");
+                ordersMapper.updateById(data);
+                return new ResultVo("已经为您极速退货",StatusVo.success,null);
+            } else if ("3".equals(data.getStatus())) {
+                data.setStatus("8");
+                ordersMapper.updateById(data);
+                return new ResultVo("申请退货成功,等待管理审核",StatusVo.success,null);
+            }
+
+        }
+        else
+        {
+            return new ResultVo("订单不存在",StatusVo.Error,null);
+        }
+
+
+        return null;
     }
 
 

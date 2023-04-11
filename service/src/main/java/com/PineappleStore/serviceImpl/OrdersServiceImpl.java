@@ -19,11 +19,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
+import org.apache.ibatis.ognl.enhance.OrderedReturn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -54,6 +56,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
     @Autowired
     private ProductMapper productMapper;
+
+    @Resource
+//    private OrderReturnMapper  orderReturnMapper;
 
 
     @Override
@@ -523,6 +528,36 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
             return new ResultVo("成功确认收货",StatusVo.success,null);
         }
 //        return new ResultVo("系统错误，联系管理员",StatusVo.Error,null);
+    }
+
+    @Override
+    public ResultVo returnOrder(List<Orders> list) {
+
+        int count = 0;
+        for (Orders item : list) {
+
+            if ("2".equals(item.getStatus())||"3".equals(item.getStatus())) {
+                UUID uuid = UUID.randomUUID();
+                item.setDeliveryType("中通快递");
+                item.setDeliveryFlowId(uuid.toString());
+                item.setDeliveryTime(new Date());
+                item.setStatus("7");
+                ordersMapper.updateById(item);
+                count++;
+            }
+        }
+        return new ResultVo("成功同意用户退货" + count, StatusVo.success, list);
+    }
+
+    @Override
+    public ResultVo getReturnDesc(String orderId) {
+//       MPJLambdaWrapper<orderRe>
+//        LambdaQueryWrapper<OrderReturn> wrapper =new LambdaQueryWrapper<OrderedReturn>()
+//                .select()
+//                .eq();
+//
+//        OrderReturn data =   orderReturnMapper.selectOne(wrapper);
+        return new ResultVo("查询成功" , StatusVo.success, null);
     }
 
 

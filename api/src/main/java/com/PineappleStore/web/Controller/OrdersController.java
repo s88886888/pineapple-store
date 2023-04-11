@@ -130,5 +130,24 @@ public class OrdersController {
     }
 
 
+
+    @ApiOperation(value = "退货审核", notes = "退货审核")
+    @PostMapping("/returnOrder")
+    public ResultVo returnOrder(@RequestBody List<Orders> orders) {
+        return ordersService.returnOrder(orders);
+
+    }
+
+
+
+    @ApiOperation(value = "获取退货理由", notes = "获取退货理由")
+    @PostMapping("/getReturnDesc")
+    public ResultVo getReturnDesc(@RequestParam String OrderId) {
+        return ordersService.getReturnDesc(OrderId);
+
+    }
+
+
+
 }
 

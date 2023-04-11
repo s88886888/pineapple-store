@@ -4,10 +4,7 @@ package com.PineappleStore.serviceImpl;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.WebSocket.PayWebSocket;
-import com.PineappleStore.dao.OrderItemMapper;
-import com.PineappleStore.dao.OrdersMapper;
-import com.PineappleStore.dao.ProductMapper;
-import com.PineappleStore.dao.ShoppingCartMapper;
+import com.PineappleStore.dao.*;
 import com.PineappleStore.entity.*;
 import com.PineappleStore.service.OrdersService;
 import com.alipay.easysdk.factory.Factory;
@@ -18,6 +15,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.base.MPJBaseServiceImpl;
+import com.github.yulichang.query.MPJLambdaQueryWrapper;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.ognl.enhance.OrderedReturn;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +56,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     private ProductMapper productMapper;
 
     @Resource
-//    private OrderReturnMapper  orderReturnMapper;
+    private OrderReturnMapper orderReturnMapper;
 
 
     @Override
@@ -551,12 +549,11 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
     @Override
     public ResultVo getReturnDesc(String orderId) {
-//       MPJLambdaWrapper<orderRe>
-//        LambdaQueryWrapper<OrderReturn> wrapper =new LambdaQueryWrapper<OrderedReturn>()
-//                .select()
-//                .eq();
-//
-//        OrderReturn data =   orderReturnMapper.selectOne(wrapper);
+        MPJLambdaQueryWrapper<OrderReturn> wrapper =new MPJLambdaQueryWrapper<OrderReturn>()
+                .selectAll(OrderReturn.class)
+                .eq(OrderReturn::getOrderId,orderId);
+
+          OrderReturn data =   orderReturnMapper.selectOne(wrapper);
         return new ResultVo("查询成功" , StatusVo.success, null);
     }
 

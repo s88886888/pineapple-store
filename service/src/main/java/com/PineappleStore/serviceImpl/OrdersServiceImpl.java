@@ -15,7 +15,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.base.MPJBaseServiceImpl;
-import com.github.yulichang.query.MPJLambdaQueryWrapper;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -504,25 +503,22 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
     @Override
-    public ResultVo confirmReceipt(String orderId,Integer userId) {
+    public ResultVo confirmReceipt(String orderId, Integer userId) {
 
-        MPJLambdaWrapper<Orders> dataWrapper =new MPJLambdaWrapper<Orders>()
+        MPJLambdaWrapper<Orders> dataWrapper = new MPJLambdaWrapper<Orders>()
                 .selectAll(Orders.class)
-                .eq(Orders::getOrderId,orderId)
-                .eq(Orders::getUserId,userId);
+                .eq(Orders::getOrderId, orderId)
+                .eq(Orders::getUserId, userId);
 
-        Orders orders =   ordersMapper.selectOne(dataWrapper);
+        Orders orders = ordersMapper.selectOne(dataWrapper);
 
 
-        if (orders==null)
-        {
-            return new ResultVo("用户不存在该订单",StatusVo.Error,null);
-        }
-        else
-        {
+        if (orders == null) {
+            return new ResultVo("用户不存在该订单", StatusVo.Error, null);
+        } else {
             orders.setStatus("5");
-             ordersMapper.updateById(orders);
-            return new ResultVo("成功确认收货",StatusVo.success,null);
+            ordersMapper.updateById(orders);
+            return new ResultVo("成功确认收货", StatusVo.success, null);
         }
 //        return new ResultVo("系统错误，联系管理员",StatusVo.Error,null);
     }
@@ -533,13 +529,14 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         int count = 0;
         for (Orders item : list) {
 
-            if ("2".equals(item.getStatus())||"3".equals(item.getStatus())) {
+            if ("7".equals(item.getStatus())) {
                 UUID uuid = UUID.randomUUID();
-                item.setDeliveryType("中通快递");
                 item.setDeliveryFlowId(uuid.toString());
                 item.setDeliveryTime(new Date());
-                item.setStatus("7");
+                item.setStatus("6");
+                item.setCloseType(5);
                 ordersMapper.updateById(item);
+                orderReturnMapper.updateOrderStatus(item.getOrderId(),new Date());
                 count++;
             }
         }
@@ -547,40 +544,54 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     }
 
     @Override
-    public ResultVo getReturnDesc(String orderId) {
-        MPJLambdaQueryWrapper<OrderReturn> wrapper =new MPJLambdaQueryWrapper<OrderReturn>()
-                .selectAll(OrderReturn.class)
-                .eq(OrderReturn::getOrderId,orderId);
+    public ResultVo noreturnOrder(List<Orders> list) {
 
-          OrderReturn data =   orderReturnMapper.selectOne(wrapper);
-        return new ResultVo("查询成功" , StatusVo.success, data);
+        int count = 0;
+        for (Orders item : list) {
+
+            if ("7".equals(item.getStatus())) {
+                item.setStatus("3");
+                ordersMapper.updateById(item);
+                orderReturnMapper.updateOrderNoStatus(item.getOrderId(),new Date());
+                count++;
+            }
+        }
+        return new ResultVo("驳回用户退货申请" + count, StatusVo.success, list);
+    }
+
+    @Override
+    public ResultVo
+    getReturnDesc(String orderId) {
+
+
+
+        OrderReturn data = orderReturnMapper.selectOrderReturnDesc(orderId);
+
+        return new ResultVo("查询成功", StatusVo.success, data);
     }
 
     @Override
     public ResultVo returnOrderUser(String orderId) {
 
 
+        Orders data = ordersMapper.selectById(orderId);
 
-        Orders data=  ordersMapper.selectById(orderId);
+        if (data != null) {
 
-        if (data!=null)
-        {
-
-            if ("2".equals(data.getStatus()))
-            {
-                data.setStatus("7");
+            if ("2".equals(data.getStatus())) {
+                data.setStatus("6");
+                data.setCloseType(5);
                 ordersMapper.updateById(data);
-                return new ResultVo("已经为您极速退货",StatusVo.success,null);
+                return new ResultVo("已经为您极速退货", StatusVo.success, null);
             } else if ("3".equals(data.getStatus())) {
-                data.setStatus("8");
+                data.setStatus("7");
+                data.setCloseType(5);
                 ordersMapper.updateById(data);
-                return new ResultVo("申请退货成功,等待管理审核",StatusVo.success,null);
+                return new ResultVo("申请退货成功,等待管理审核", StatusVo.success, null);
             }
 
-        }
-        else
-        {
-            return new ResultVo("订单不存在",StatusVo.Error,null);
+        } else {
+            return new ResultVo("订单不存在", StatusVo.Error, null);
         }
 
 

@@ -55,6 +55,8 @@ public interface OrdersService extends MPJBaseService<Orders> {
     ResultVo confirmReceipt(String orderId,Integer userId);
 
     ResultVo  returnOrder(List<Orders> list);
+
+    ResultVo  noreturnOrder(List<Orders> list);
     ResultVo  getReturnDesc(String orderId);
 
     ResultVo  returnOrderUser(String orderId);

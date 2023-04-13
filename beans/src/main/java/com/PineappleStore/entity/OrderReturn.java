@@ -1,6 +1,7 @@
 package com.PineappleStore.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -40,6 +41,11 @@ public class OrderReturn implements Serializable {
 
     private String orderReturn;
 
+    @ApiModelProperty("创建时间")
+    private Date createTime;
 
 
+    private Integer returnExa;
+
+    private Date returnExaTime;
 }

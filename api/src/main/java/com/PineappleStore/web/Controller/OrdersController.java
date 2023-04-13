@@ -132,17 +132,25 @@ public class OrdersController {
 
 
     @ApiOperation(value = "退货审核", notes = "退货审核")
-    @PostMapping("/returnOrder")
+    @PutMapping("/returnOrder")
     public ResultVo returnOrder(@RequestBody List<Orders> orders) {
         return ordersService.returnOrder(orders);
 
     }
 
 
+    @ApiOperation(value = "驳回审核", notes = "退货审核")
+    @PutMapping("/noReturnOrder")
+    public ResultVo noreturnOrder(@RequestBody List<Orders> orders) {
+        return ordersService.noreturnOrder(orders);
+
+    }
+
+
 
     @ApiOperation(value = "获取退货理由", notes = "获取退货理由")
-    @PostMapping("/getReturnDesc")
-    public ResultVo getReturnDesc(@RequestParam String OrderId) {
+    @GetMapping("/getReturnDesc/{OrderId}")
+    public ResultVo getReturnDesc(@PathVariable String OrderId) {
         return ordersService.getReturnDesc(OrderId);
 
     }

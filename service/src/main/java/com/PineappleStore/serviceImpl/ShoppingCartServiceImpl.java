@@ -109,7 +109,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
 
         ShoppingCart shoppingCartOne = shoppingCartMapper.selectOne(wrapper);
 
-        redisUtil.del("shop" + shoppingCart.getUserId());
+
 
         if (shoppingCartOne != null) {
 
@@ -122,7 +122,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
                 return new ResultVo("增加失败:数量不能超过10！", 203, null);
             }
             shoppingCart.setCartNum(String.valueOf(cartNum + 1));
-
+            redisUtil.del("shop" + shoppingCart.getUserId());
             return UpdateByModel(shoppingCart);
 
         } else {
@@ -142,6 +142,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
                     .eq(ShoppingCart::getCartId, shoppingCart.getCartId());
             ShoppingCartVo data = shoppingCartMapper.selectJoinOne(ShoppingCartVo.class, queryWrapper);
 
+            redisUtil.del("shop" + shoppingCart.getUserId());
             if (i > 0) {
                 return new ResultVo("添加购物车成功", StatusVo.success, data);
 
@@ -195,7 +196,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         if (SelectByIdForBoolean(shoppingCart.getCartId())) {
 
             shoppingCartMapper.updateById(shoppingCart);
-
+            redisUtil.del("shop" + shoppingCart.getUserId());
             return new ResultVo("修改购物成功", StatusVo.created, shoppingCart);
         } else {
 

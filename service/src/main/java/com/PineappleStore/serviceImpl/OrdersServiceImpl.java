@@ -1,6 +1,7 @@
 package com.PineappleStore.serviceImpl;
 
 
+import com.PineappleStore.RedisService.RedisUtil;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.WebSocket.PayWebSocket;
@@ -55,6 +56,9 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
 
     @Resource
     private OrderReturnMapper orderReturnMapper;
+
+    @Resource
+    private RedisUtil redisUtil;
 
 
     @Override
@@ -257,6 +261,10 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
             orders.setTotalAmount(TotalAmount);
             orders.setStatus("1");
             int in = ordersMapper.insert(orders);
+
+
+            redisUtil.del("shop" + orders.getUserId());
+
 
             if (in > 0) {
 
@@ -517,6 +525,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
             return new ResultVo("用户不存在该订单", StatusVo.Error, null);
         } else {
             orders.setStatus("5");
+            orders.setFlishTime(new Date());
             ordersMapper.updateById(orders);
             return new ResultVo("成功确认收货", StatusVo.success, null);
         }
@@ -536,7 +545,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
                 item.setStatus("6");
                 item.setCloseType(5);
                 ordersMapper.updateById(item);
-                orderReturnMapper.updateOrderStatus(item.getOrderId(),new Date());
+                orderReturnMapper.updateOrderStatus(item.getOrderId(), new Date());
                 count++;
             }
         }
@@ -552,7 +561,7 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
             if ("7".equals(item.getStatus())) {
                 item.setStatus("3");
                 ordersMapper.updateById(item);
-                orderReturnMapper.updateOrderNoStatus(item.getOrderId(),new Date());
+                orderReturnMapper.updateOrderNoStatus(item.getOrderId(), new Date());
                 count++;
             }
         }
@@ -562,7 +571,6 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
     @Override
     public ResultVo
     getReturnDesc(String orderId) {
-
 
 
         OrderReturn data = orderReturnMapper.selectOrderReturnDesc(orderId);

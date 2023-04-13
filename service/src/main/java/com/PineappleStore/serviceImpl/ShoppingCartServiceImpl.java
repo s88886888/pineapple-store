@@ -53,8 +53,8 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Override
     public ResultVo SelectByUserid(String Id) {
 
-        if (redisUtil.hasKey("shop"+Id)) {
-            return new ResultVo("查询成功", StatusVo.success, redisUtil.get("shop"+Id));
+        if (redisUtil.hasKey("shop" + Id)) {
+            return new ResultVo("查询成功", StatusVo.success, redisUtil.get("shop" + Id));
         } else {
 
             List<ShoppingCartVo> ShoppingCartVo = shoppingCartMapper.selectJoinList(ShoppingCartVo.class, new MPJLambdaWrapper<ShoppingCart>()
@@ -109,6 +109,8 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
 
         ShoppingCart shoppingCartOne = shoppingCartMapper.selectOne(wrapper);
 
+        redisUtil.del("shop" + shoppingCart.getUserId());
+
         if (shoppingCartOne != null) {
 
             shoppingCart.setCartId(shoppingCartOne.getCartId());
@@ -121,7 +123,6 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
             }
             shoppingCart.setCartNum(String.valueOf(cartNum + 1));
 
-            redisUtil.del("shop" + shoppingCartOne.getUserId());
             return UpdateByModel(shoppingCart);
 
         } else {
@@ -141,9 +142,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
                     .eq(ShoppingCart::getCartId, shoppingCart.getCartId());
             ShoppingCartVo data = shoppingCartMapper.selectJoinOne(ShoppingCartVo.class, queryWrapper);
 
-
             if (i > 0) {
-                redisUtil.del("shop" + data.getUserId());
                 return new ResultVo("添加购物车成功", StatusVo.success, data);
 
             } else {
@@ -165,7 +164,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
 
         LambdaQueryWrapper<ShoppingCart> wrapper = new LambdaQueryWrapper<ShoppingCart>()
                 .select(ShoppingCart::getCartId, ShoppingCart::getUserId)
-                .eq(ShoppingCart::getCartId,Id);
+                .eq(ShoppingCart::getCartId, Id);
 
         ShoppingCart data = shoppingCartMapper.selectOne(wrapper);
 
@@ -174,9 +173,9 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
 
             int category = shoppingCartMapper.deleteById(data.getCartId());
             if (category > 0) {
-                if (redisUtil.hasKey("shop" + data.getUserId())) {
-                    redisUtil.del("shop"+ data.getUserId());
-                }
+
+                redisUtil.del("shop" + data.getUserId());
+
                 return new ResultVo("删除成功", StatusVo.success, null);
             } else {
                 return new ResultVo("删除失败：服务异常，请联系管理员", StatusVo.Error, null);
@@ -191,12 +190,15 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Override
     public ResultVo UpdateByModel(ShoppingCart shoppingCart) {
 
+
+
         if (SelectByIdForBoolean(shoppingCart.getCartId())) {
 
             shoppingCartMapper.updateById(shoppingCart);
-            redisUtil.del("shop" + shoppingCart.getUserId());
+
             return new ResultVo("修改购物成功", StatusVo.created, shoppingCart);
         } else {
+
             return new ResultVo("更新失败，该数据不存在", StatusVo.Error, null);
         }
 

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static com.PineappleStore.Utils.IPUtils.getIpAddr;
+
+
 /**
  * <p>
  * 订单  前端控制器
@@ -33,7 +36,12 @@ public class OrdersController {
 
     @GetMapping("/List")
     @ApiOperation(value = "获取全部数据", notes = "获取全部数据")
-    public ResultVo SelectByAll() {
+    public ResultVo SelectByAll(HttpServletRequest request) {
+
+
+        String ip = getIpAddr(request);
+
+        System.err.println(ip + "QAQ");
         return ordersService.SelectByAll();
     }
 
@@ -84,8 +92,8 @@ public class OrdersController {
 
     @PutMapping("/UpdateUserOff")
     @ApiOperation(value = "用户手动取消订单", notes = "用户手动取消订单")
-    public ResultVo UpdateUserOff(@RequestParam String OrderID , @RequestParam String UserId) {
-        return ordersService.UpdateUserOff(OrderID,UserId);
+    public ResultVo UpdateUserOff(@RequestParam String OrderID, @RequestParam String UserId) {
+        return ordersService.UpdateUserOff(OrderID, UserId);
     }
 
     @DeleteMapping("/{id}")

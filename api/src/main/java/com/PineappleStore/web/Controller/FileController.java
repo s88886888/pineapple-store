@@ -10,6 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,13 +24,13 @@ public class FileController {
     @Value(value = "${filePath}")
     private String filePath;
 
-    @Value(value = "${localHostUrl}")
-    private String localHostUrl;
+    @Value("${server.port}")
+    private int port;
 
 
     @PostMapping("/")
     @ResponseBody
-    public ResultVo upload(@NotNull @RequestParam MultipartFile file) {
+    public ResultVo upload(@NotNull @RequestParam MultipartFile file) throws UnknownHostException {
 
 
         if (file.isEmpty()) {
@@ -55,8 +57,11 @@ public class FileController {
         } catch (IOException | IllegalStateException e) {
             throw new RuntimeException(e);
         }
+        InetAddress localHost = InetAddress.getLocalHost();
 
-        return new ResultVo("图片上传成功", StatusVo.success, localHostUrl + uuid + fileSuffix);
+        http:
+//localhost:8099/#/updateGoods?productId=0f63e98b-24ed-4c13-8332-df9201db93a6
+        return new ResultVo("图片上传成功", StatusVo.success, "http://" + localHost.getHostAddress() + ":" + port + "/" + "image/" + uuid + fileSuffix);
 
     }
 

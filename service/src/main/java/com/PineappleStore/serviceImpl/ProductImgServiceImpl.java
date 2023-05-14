@@ -9,6 +9,7 @@ import com.PineappleStore.service.ProductImgService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -69,14 +70,31 @@ public class ProductImgServiceImpl extends ServiceImpl<ProductImgMapper, Product
     public ResultVo AddModelList(imgVo list) {
 
 
-        for (ProductImg item : list.getImgList()) {
-            item.setId(String.valueOf(UUID.randomUUID()));
-            item.setIsMain(0);
-            item.setItemId(list.getItemId());
-            item.setCreatedTime(new Date());
-            item.setUpdatedTime(new Date());
-            productImgMapper.insert(item);
-        }
+            LambdaQueryWrapper<ProductImg> wrapper = new LambdaQueryWrapper<ProductImg>()
+                    .eq(ProductImg::getIsMain, 0)
+                    .eq(ProductImg::getItemId, list.getItemId());
+            List<ProductImg> productList = productImgMapper.selectList(wrapper);
+
+
+            if (productList != null) {
+                for (ProductImg item : productList) {
+                    productImgMapper.deleteById(item.getId());
+                }
+            }
+            for (ProductImg item : list.getImgList()) {
+
+
+                    item.setId(String.valueOf(UUID.randomUUID()));
+                    item.setIsMain(0);
+                    item.setItemId(list.getItemId());
+                    item.setCreatedTime(new Date());
+                    item.setUpdatedTime(new Date());
+                    productImgMapper.insert(item);
+
+
+
+            }
+
 
         return new ResultVo("商品列表数据变更成功", StatusVo.success, null);
     }
@@ -128,8 +146,6 @@ public class ProductImgServiceImpl extends ServiceImpl<ProductImgMapper, Product
 
 
         if (SelectByProductStarForBoolean(ProductImg.getItemId())) {
-
-
             if (SelectByIdForBoolean(ProductImg.getId())) {
                 productImgMapper.updateById(ProductImg);
                 return new ResultVo("更新成功", StatusVo.success, null);
@@ -143,6 +159,7 @@ public class ProductImgServiceImpl extends ServiceImpl<ProductImgMapper, Product
 
     @Override
     public ResultVo UpdateByUrl(ProductImg productImg) {
+
         LambdaQueryWrapper<ProductImg> wrapper = new LambdaQueryWrapper<ProductImg>()
                 .eq(ProductImg::getIsMain, 1)
                 .eq(ProductImg::getItemId, productImg.getItemId());

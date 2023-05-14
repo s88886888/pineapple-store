@@ -77,7 +77,7 @@ public class ProductImgController {
     public ResultVo AddModel(@RequestBody imgVo imgVo) {
 
 
-        System.out.println(imgVo + "---------------------------------------------");
+//        System.out.println(imgVo + "---------------------------------------------");
         return productImgService.AddModelList(imgVo);
 
     }

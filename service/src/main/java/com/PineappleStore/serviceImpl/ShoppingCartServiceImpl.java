@@ -192,7 +192,6 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     public ResultVo UpdateByModel(ShoppingCart shoppingCart) {
 
 
-
         if (SelectByIdForBoolean(shoppingCart.getCartId())) {
 
             shoppingCartMapper.updateById(shoppingCart);

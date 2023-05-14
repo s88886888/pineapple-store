@@ -8,12 +8,17 @@ import com.PineappleStore.Utils.Md5Utils;
 import com.PineappleStore.Utils.smsBao;
 import com.PineappleStore.dao.UserChenckMapper;
 import com.PineappleStore.dao.UsersMapper;
+import com.PineappleStore.entity.ProductVo;
 import com.PineappleStore.entity.UserChenck;
 import com.PineappleStore.entity.Users;
 import com.PineappleStore.service.UsersService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
+import com.mysql.cj.util.StringUtils;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.DefaultJwtBuilder;
@@ -22,10 +27,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 
 /**
@@ -71,22 +73,60 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         return checkuser == null;
     }
 
+    @Override
+    public ResultVo getUserPage(String name, String phone, int current, int size) {
+        MPJLambdaWrapper<Users> wrapper = new MPJLambdaWrapper<Users>().selectAll(Users.class);
+
+        if (!StringUtils.isNullOrEmpty(name)) {
+            wrapper.like(Users::getUsername, name);
+        }
+        if (!StringUtils.isNullOrEmpty(phone)) {
+            wrapper.like(Users::getUserMobile, phone);
+        }
+
+        IPage<Users> data = usersMapper.selectJoinPage(new Page<>(current, size), Users.class, wrapper);
+
+        return new ResultVo("查询成功", StatusVo.success, data);
+
+    }
+
+    @Override
+    public ResultVo updateUserStatus(Integer userId) {
+
+        Users users = usersMapper.selectById(userId);
+
+        if (users != null) {
+
+            if (users.getIsValid() == 1) {
+                users.setIsValid(0);
+            } else {
+                users.setIsValid(1);
+            }
+            usersMapper.updateById(users);
+            return new ResultVo("修改成功", StatusVo.success, null);
+
+        } else {
+            return new ResultVo("修改失败，不存在该用户", StatusVo.Error, null);
+        }
+
+
+    }
+
 
     @Override
 
-    public TokenVo Login(String userAccount, String passWord, String loginToken, int loginType) throws Exception {
+    public TokenVo Login(String userAccount, String passWord, String loginToken, int loginType, String ip) throws Exception {
 
         if (DingxiangCheck.Checktoken(loginToken)) {
 
 
             String md5pwd = Md5Utils.md5(passWord);
             QueryWrapper<Users> wrapper = new QueryWrapper<>();
+            //手机号码为0 用户名称为1
             if (loginType == 1) {
-                wrapper.lambda().select(Users::getUserMobile, Users::getUsername, Users::getPassword, Users::getUserId).eq(Users::getUsername, userAccount)
-                        .eq(Users::getPassword, md5pwd);
+                wrapper.lambda().select(Users::getUserMobile, Users::getUsername, Users::getPassword, Users::getUserId, Users::getIsValid).eq(Users::getUsername, userAccount).eq(Users::getPassword, md5pwd);
             } else {
-                wrapper.lambda().select(Users::getUsername, Users::getUserMobile, Users::getPassword, Users::getUserId).eq(Users::getUserMobile, userAccount)
-                        .eq(Users::getPassword, md5pwd);
+                wrapper.lambda().select(Users::getUsername, Users::getUserMobile, Users::getPassword, Users::getUserId, Users::getIsValid).eq(Users::getUserMobile, userAccount).eq(Users::getPassword, md5pwd);
             }
 
             Users user = usersMapper.selectOne(wrapper);
@@ -96,7 +136,14 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
             }
 
             if (md5pwd.equals(user.getPassword())) {
-                return new TokenVo("用户登录成功", StatusVo.success, user, createToken(userAccount, user));
+                if (user.getIsValid() == 0) {
+                    return new TokenVo("该账号已经被管理员禁用", StatusVo.Error, user, null);
+                }
+                user.setUserIp(ip);
+                String token = createToken(userAccount, user);
+                user.setToken(token);
+                usersMapper.updateById(user);
+                return new TokenVo("用户登录成功", StatusVo.success, user, token);
             } else {
                 return new TokenVo("用户登录失败:密码错误", StatusVo.success, user, null);
             }
@@ -110,7 +157,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
     @Transactional
-    public TokenVo resgit(String userName, String phone, String passWord, String phoneCode) {
+    public TokenVo resgit(String userName, String phone, String passWord, String phoneCode, String ip) {
 
         //线程锁
         synchronized (this) {
@@ -122,10 +169,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
                 //检查验证码过期模块
                 LambdaQueryWrapper<UserChenck> wrapper = new LambdaQueryWrapper<>();
-                wrapper.select(UserChenck::getPhone, UserChenck::getCode, UserChenck::getCreateTime)
-                        .eq(UserChenck::getPhone, phone)
-                        .orderByDesc(UserChenck::getCreateTime)
-                        .last("LIMIT 1");
+                wrapper.select(UserChenck::getPhone, UserChenck::getCode, UserChenck::getCreateTime).eq(UserChenck::getPhone, phone).orderByDesc(UserChenck::getCreateTime).last("LIMIT 1");
 
                 UserChenck userChenck = userChenckMapper.selectOne(wrapper);
 
@@ -161,11 +205,13 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 users.setUserImg("img/user.jpg");
                 users.setUserRegtime(new Date());
                 users.setUserModtime(new Date());
-
+                users.setUserIp(ip);
+                users.setIsValid(1);
+                String token = createToken(userName, users);
                 int i = usersMapper.insert(users);
 
                 if (i > 0) {
-                    return new TokenVo("注册成功", StatusVo.success, users, createToken(userName, users));
+                    return new TokenVo("注册成功", StatusVo.success, users, token);
                 } else {
                     return new TokenVo("注册失败", StatusVo.Error, null, null);
                 }

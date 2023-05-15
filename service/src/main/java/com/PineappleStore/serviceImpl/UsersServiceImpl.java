@@ -1,5 +1,6 @@
 package com.PineappleStore.serviceImpl;
 
+import com.PineappleStore.RedisService.RedisUtil;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.ResultVo.TokenVo;
@@ -11,6 +12,7 @@ import com.PineappleStore.dao.UsersMapper;
 import com.PineappleStore.entity.ProductVo;
 import com.PineappleStore.entity.UserChenck;
 import com.PineappleStore.entity.Users;
+import com.PineappleStore.entity.adminVo;
 import com.PineappleStore.service.UsersService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -23,10 +25,12 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.DefaultJwtBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 
@@ -49,9 +53,15 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     @Autowired
     private UserChenckMapper userChenckMapper;
 
+    @Resource
+    private RedisUtil redisUtil;
+
 
     @Autowired
     private smsBao smsBao;
+
+    @Value("${adminPassWord}")
+    private String adminPassword;
 
     public boolean CheckUserByName(String userName) {
 
@@ -110,6 +120,25 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         }
 
 
+    }
+
+    @Override
+    public ResultVo adminLogin(adminVo adminvo) {
+        if (redisUtil.hasKey("admin")) {
+            if (adminvo.getPassWrod().equals(redisUtil.get("admin"))) {
+                Users admin = new Users();
+                admin.setUserId(1);
+                String token = createToken("admin", admin);
+                return new ResultVo("登录成功", StatusVo.Error, token);
+            } else {
+                return new ResultVo("请先检查账号和密码", StatusVo.Error, null);
+            }
+        }
+        else
+        {
+            redisUtil.set("admin", adminPassword);
+        }
+        return new ResultVo("系统加载超级用户中", StatusVo.Error, null);
     }
 
 
@@ -225,13 +254,16 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         JwtBuilder builder = new DefaultJwtBuilder();
         Map<String, Object> map = new HashMap<>();
         map.put("Username", userName);
+
+
         return builder.setSubject(userName) //token中携带的数据 支持链式调用  token 主题
                 .setIssuedAt(new Date()) //设置token的⽣成时间
                 .setId(users.getUserId() + "") //设置⽤户id为 token id
                 .setClaims(map) //map中可以存 放⽤户的⻆⾊权限信息
-                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) //设置过期时间  ==1 天
+                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 60)) //设置过期时间  ==1 天
                 .signWith(SignatureAlgorithm.HS256, "Linson_H") //设置加密⽅式和 加密的密钥
                 .compact();//返回字符串
+
 
     }
 

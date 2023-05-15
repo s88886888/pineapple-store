@@ -5,6 +5,7 @@ import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.ResultVo.TokenVo;
 import com.PineappleStore.Utils.IPUtils;
+import com.PineappleStore.entity.adminVo;
 import com.PineappleStore.service.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,9 +35,9 @@ public class UsersController {
 
     @ApiOperation(value = "登录接口", notes = "登录接口")
     @PostMapping("/login")
-    public TokenVo login(HttpServletRequest request,@RequestParam("userName") String userName, @RequestParam("passWord") String passWord, @RequestParam("loginToken") String loginToken, int loginType) throws Exception {
+    public TokenVo login(HttpServletRequest request, @RequestParam("userName") String userName, @RequestParam("passWord") String passWord, @RequestParam("loginToken") String loginToken, int loginType) throws Exception {
         String ip = IPUtils.getIpAddr(request);
-        return usersService.Login(userName, passWord, loginToken, loginType,ip);
+        return usersService.Login(userName, passWord, loginToken, loginType, ip);
     }
 
     @ApiOperation(value = "注册接口", notes = "注册接口")
@@ -44,7 +45,7 @@ public class UsersController {
     public TokenVo Resgit(HttpServletRequest request, @RequestParam String userName, @RequestParam String phone, @RequestParam String passWord, @RequestParam String phonecode) {
 
         String ip = IPUtils.getIpAddr(request);
-        return usersService.resgit(userName, phone, passWord, phonecode,ip);
+        return usersService.resgit(userName, phone, passWord, phonecode, ip);
     }
 
     @ApiOperation(value = "获取手机验证码", notes = "获取手机验证码")
@@ -88,7 +89,6 @@ public class UsersController {
     }
 
 
-
     @ApiOperation(value = "修改用户启用标识", notes = "修改用户启用标识")
     @PutMapping("/updateUserStatus/{userId}")
     public ResultVo updateUserStatus(@PathVariable Integer userId) {
@@ -97,6 +97,14 @@ public class UsersController {
 
     }
 
+
+    @ApiOperation(value = "管理员登录", notes = "管理员登录")
+    @PostMapping("/adminLogin")
+    public ResultVo adminLogin(@RequestBody adminVo adminVo) {
+
+        return usersService.adminLogin(adminVo);
+
+    }
 
 
 }

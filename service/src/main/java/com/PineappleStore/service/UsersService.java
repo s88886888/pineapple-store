@@ -3,6 +3,7 @@ package com.PineappleStore.service;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.ResultVo.TokenVo;
 import com.PineappleStore.entity.Users;
+import com.PineappleStore.entity.adminVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,6 +36,8 @@ public interface UsersService extends IService<Users> {
     ResultVo getUserPage(String name, String phone, int current, int size);
 
     ResultVo updateUserStatus(Integer userId);
+
+    ResultVo adminLogin(adminVo adminvo);
 
 
 }

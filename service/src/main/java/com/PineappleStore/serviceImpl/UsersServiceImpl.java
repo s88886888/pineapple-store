@@ -9,7 +9,6 @@ import com.PineappleStore.Utils.Md5Utils;
 import com.PineappleStore.Utils.smsBao;
 import com.PineappleStore.dao.UserChenckMapper;
 import com.PineappleStore.dao.UsersMapper;
-import com.PineappleStore.entity.ProductVo;
 import com.PineappleStore.entity.UserChenck;
 import com.PineappleStore.entity.Users;
 import com.PineappleStore.entity.adminVo;
@@ -31,7 +30,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 
 /**
@@ -60,8 +62,8 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     @Autowired
     private smsBao smsBao;
 
-    @Value("${adminPassWord}")
-    private String adminPassword;
+    @Value(value = "${adminPassWord}")
+    private String adminPassWord;
 
     public boolean CheckUserByName(String userName) {
 
@@ -125,18 +127,16 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     @Override
     public ResultVo adminLogin(adminVo adminvo) {
         if (redisUtil.hasKey("admin")) {
-            if (adminvo.getPassWrod().equals(redisUtil.get("admin"))) {
+            if (redisUtil.get("admin").equals(adminvo.getPassWrod())) {
                 Users admin = new Users();
                 admin.setUserId(1);
                 String token = createToken("admin", admin);
-                return new ResultVo("登录成功", StatusVo.Error, token);
+                return new ResultVo("登录成功", StatusVo.success, token);
             } else {
                 return new ResultVo("请先检查账号和密码", StatusVo.Error, null);
             }
-        }
-        else
-        {
-            redisUtil.set("admin", adminPassword);
+        } else {
+            redisUtil.set("admin", adminPassWord);
         }
         return new ResultVo("系统加载超级用户中", StatusVo.Error, null);
     }

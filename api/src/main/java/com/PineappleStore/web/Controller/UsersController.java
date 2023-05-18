@@ -6,12 +6,14 @@ import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.ResultVo.TokenVo;
 import com.PineappleStore.Utils.IPUtils;
 import com.PineappleStore.entity.adminVo;
+import com.PineappleStore.service.OrdersService;
 import com.PineappleStore.service.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -31,6 +33,7 @@ public class UsersController {
 
     @Autowired
     private UsersService usersService;
+
 
 
     @ApiOperation(value = "登录接口", notes = "登录接口")
@@ -105,6 +108,7 @@ public class UsersController {
         return usersService.adminLogin(adminVo);
 
     }
+
 
 
 }

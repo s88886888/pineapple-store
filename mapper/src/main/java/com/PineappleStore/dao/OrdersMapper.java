@@ -2,6 +2,7 @@ package com.PineappleStore.dao;
 
 import com.PineappleStore.entity.Orders;
 import com.PineappleStore.entity.OrdersVo;
+import com.PineappleStore.entity.orderWeekVo;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.springframework.stereotype.Repository;
 
@@ -19,5 +20,8 @@ import java.util.List;
 public interface OrdersMapper extends MPJBaseMapper<Orders> {
 
     List<OrdersVo> SelectByIdUserId(String id);
+
+
+    List<orderWeekVo> selectWeekOrder();
 
 }

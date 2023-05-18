@@ -606,5 +606,10 @@ public class OrdersServiceImpl extends MPJBaseServiceImpl<OrdersMapper, Orders> 
         return null;
     }
 
+    @Override
+    public List<orderWeekVo> selectWeekORder() {
+     return   ordersMapper.selectWeekOrder();
+    }
+
 
 }

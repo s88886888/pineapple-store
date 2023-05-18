@@ -3,6 +3,7 @@ package com.PineappleStore.service;
 import com.PineappleStore.ResultVo.ResultVo;
 import com.PineappleStore.entity.Orders;
 import com.PineappleStore.entity.OrdersVo;
+import com.PineappleStore.entity.orderWeekVo;
 import com.github.yulichang.base.MPJBaseService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -60,6 +61,8 @@ public interface OrdersService extends MPJBaseService<Orders> {
     ResultVo  getReturnDesc(String orderId);
 
     ResultVo  returnOrderUser(String orderId);
+
+    List<orderWeekVo>  selectWeekORder();
 
 
 }

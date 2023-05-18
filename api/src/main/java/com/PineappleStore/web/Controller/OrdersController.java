@@ -2,6 +2,7 @@ package com.PineappleStore.web.Controller;
 
 
 import com.PineappleStore.ResultVo.ResultVo;
+import com.PineappleStore.ResultVo.StatusVo;
 import com.PineappleStore.entity.Orders;
 import com.PineappleStore.entity.OrdersVo;
 import com.PineappleStore.service.OrdersService;
@@ -132,11 +133,10 @@ public class OrdersController {
 
     @ApiOperation(value = "用户收货", notes = "用户收货")
     @PostMapping("/confirmReceipt")
-    public ResultVo confirmReceipt(@RequestParam String orderId,@RequestParam Integer userId) {
-        return ordersService.confirmReceipt(orderId,userId);
+    public ResultVo confirmReceipt(@RequestParam String orderId, @RequestParam Integer userId) {
+        return ordersService.confirmReceipt(orderId, userId);
 
     }
-
 
 
     @ApiOperation(value = "退货审核", notes = "退货审核")
@@ -155,7 +155,6 @@ public class OrdersController {
     }
 
 
-
     @ApiOperation(value = "获取退货理由", notes = "获取退货理由")
     @GetMapping("/getReturnDesc/{OrderId}")
     public ResultVo getReturnDesc(@PathVariable String OrderId) {
@@ -169,6 +168,8 @@ public class OrdersController {
         return ordersService.returnOrderUser(OrderId);
 
     }
+
+
 
 
 
